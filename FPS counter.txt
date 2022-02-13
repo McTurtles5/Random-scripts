@@ -1,0 +1,306 @@
+-- TIP: Right click the FPS counter for options
+
+-- Credits:
+-- "Gui to Lua" plugin for gui
+
+local settings = {
+	["AverageCalculationAmount"] = 5, -- The amount of numbers used to get the average (higher the smoother but slower)
+	["Colors"] = { -- The colors for each state (in RGB)
+		["Bad"] = Color3.fromRGB(212, 34, 34),
+		["Ok"] = Color3.fromRGB(235, 232, 9),
+		["Good"] = Color3.fromRGB(32, 232, 86),
+		["Super"] = Color3.fromRGB(52, 232, 235),
+		["Godly"] = Color3.fromRGB(210, 77, 219)
+	},
+	["Strings"] = { -- What the options buttons will display
+		["Less"] = "Show less",
+		["More"] = "Show more",
+		["Move"] = "Move",
+		["Hideback"] = "Hide background",
+		["Showback"] = "Show background"
+	}
+}
+
+local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local PARENT = game:GetService("CoreGui")
+local BackgroundVisible = false
+local MoreVisible = false
+
+local FPScounter = Instance.new("ScreenGui")
+local Options = Instance.new("Frame")
+local ShowBackground = Instance.new("TextButton")
+local MoreButton = Instance.new("TextButton")
+local MoveButton = Instance.new("TextButton")
+local Main = Instance.new("Frame")
+local Background = Instance.new("Frame")
+local BackgroundMore = Instance.new("Frame")
+local FPSlabel = Instance.new("TextLabel")
+local More = Instance.new("Frame")
+local Plabel = Instance.new("TextLabel")
+local Hlabel = Instance.new("TextLabel")
+local RSlabel = Instance.new("TextLabel")
+
+FPScounter.Name = "FPS counter"
+FPScounter.IgnoreGuiInset = true
+FPScounter.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Options.Name = "Options"
+Options.Parent = FPScounter
+Options.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Options.BackgroundTransparency = 1.000
+Options.Position = UDim2.new(0.208000004, 0, 0, 18)
+Options.Size = UDim2.new(0, 100, 0, 60)
+Options.ZIndex = 2
+Options.Visible = false
+
+ShowBackground.Name = "ShowBackground"
+ShowBackground.Parent = Options
+ShowBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ShowBackground.BackgroundTransparency = 0.500
+ShowBackground.BorderSizePixel = 0
+ShowBackground.Size = UDim2.new(1, 0, 0, 20)
+ShowBackground.Font = Enum.Font.SourceSans
+ShowBackground.Text = settings.Strings.Showback
+ShowBackground.TextColor3 = Color3.fromRGB(255, 255, 255)
+ShowBackground.TextSize = 14.000
+
+MoreButton.Name = "MoreButton"
+MoreButton.Parent = Options
+MoreButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MoreButton.BackgroundTransparency = 0.500
+MoreButton.BorderSizePixel = 0
+MoreButton.Position = UDim2.new(0, 0, 0, 20)
+MoreButton.Size = UDim2.new(1, 0, 0, 20)
+MoreButton.Font = Enum.Font.SourceSans
+MoreButton.Text = settings.Strings.More
+MoreButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MoreButton.TextSize = 14.000
+
+MoveButton.Name = "MoveButton"
+MoveButton.Parent = Options
+MoveButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MoveButton.BackgroundTransparency = 0.500
+MoveButton.BorderSizePixel = 0
+MoveButton.Position = UDim2.new(0, 0, 0, 40)
+MoveButton.Size = UDim2.new(1, 0, 0, 20)
+MoveButton.Font = Enum.Font.SourceSans
+MoveButton.Text = settings.Strings.Move
+MoveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MoveButton.TextSize = 14.000
+
+Main.Name = "Main"
+Main.Parent = FPScounter
+Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Main.BackgroundTransparency = 1.000
+Main.Size = UDim2.new(1, 0, 1, 0)
+
+Background.Name = "Background"
+Background.Parent = Main
+Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Background.BackgroundTransparency = 1
+Background.BorderSizePixel = 0
+Background.Position = UDim2.new(0, 100, 0, 0)
+Background.Size = UDim2.new(1, -100, 0, 28)
+
+BackgroundMore.Name = "BackgroundMore"
+BackgroundMore.Parent = Main
+BackgroundMore.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundMore.BackgroundTransparency = 0.500
+BackgroundMore.BorderSizePixel = 0
+BackgroundMore.Position = UDim2.new(0, 100, 0, 28)
+BackgroundMore.Size = UDim2.new(1, -100, 0, 67)
+BackgroundMore.Visible = false
+
+FPSlabel.Name = "FPSlabel"
+FPSlabel.Parent = Main
+FPSlabel.BackgroundTransparency = 1.000
+FPSlabel.Position = UDim2.new(0, 110, 0, 0)
+FPSlabel.Size = UDim2.new(1, -110, 0, 18)
+FPSlabel.Text = "FPS: LOADING"
+FPSlabel.TextXAlignment = Enum.TextXAlignment.Left
+FPSlabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+More.Name = "MoreButton"
+More.Parent = Main
+More.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+More.BackgroundTransparency = 1.000
+More.Position = UDim2.new(0, 110, 0, 30)
+More.Size = UDim2.new(1, -110, 0, 54)
+More.Visible = false
+
+Plabel.Name = "Plabel"
+Plabel.Parent = More
+Plabel.BackgroundTransparency = 1.000
+Plabel.Position = UDim2.new(0, 0, 0, 36)
+Plabel.Size = UDim2.new(1, 0, 0, 18)
+Plabel.Text = "Physics: LOADING"
+Plabel.TextXAlignment = Enum.TextXAlignment.Left
+Plabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+Hlabel.Name = "Hlabel"
+Hlabel.Parent = More
+Hlabel.BackgroundTransparency = 1.000
+Hlabel.Position = UDim2.new(0, 0, 0, 18)
+Hlabel.Size = UDim2.new(1, 0, 0, 18)
+Hlabel.Text = "Heartbeat: LOADING"
+Hlabel.TextXAlignment = Enum.TextXAlignment.Left
+Hlabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+RSlabel.Name = "RSlabel"
+RSlabel.Parent = More
+RSlabel.BackgroundTransparency = 1.000
+RSlabel.Size = UDim2.new(1, 0, 0, 18)
+RSlabel.Text = "RenderStepped: LOADING"
+RSlabel.TextXAlignment = Enum.TextXAlignment.Left
+RSlabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+if RS:IsStudio() then
+	repeat
+		RS.RenderStepped:Wait()
+	until game:GetService("Players").LocalPlayer
+	PARENT = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+elseif syn and syn.protect_gui then
+	local pro = Instance.new("ScreenGui")
+	pro.Name = "FPS counter"
+	syn.protect_gui(pro)
+	pro.Parent = PARENT
+	PARENT = pro
+elseif PARENT:FindFirstChild("RobloxGui") then
+	PARENT = PARENT:FindFirstChild("RobloxGui")
+end
+FPScounter.Parent = PARENT
+
+function getColor(num)
+	local color = settings.Colors.Bad
+	if num > 150 then
+		color = settings.Colors.Godly
+	elseif num > 80 then
+		color = settings.Colors.Super
+	elseif num > 40 then
+		color = settings.Colors.Good
+	elseif num > 20 then
+		color = settings.Colors.Ok
+	else
+		color = settings.Colors.Bad
+	end
+	return color
+end
+
+Background.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+		local pos = UIS:GetMouseLocation()
+		Options.Position = UDim2.new(0, pos.X - 1, 0, pos.Y + 1)
+		Options.Visible = true
+	end
+end)
+
+Options.MouseLeave:Connect(function()
+	Options.Visible = false
+end)
+
+MoreButton.MouseButton1Click:Connect(function()
+	if MoreVisible then
+		MoreVisible = false
+		More.Visible = false
+		MoreButton.Text = settings.Strings.More
+		BackgroundMore.Visible = false
+	else
+		MoreVisible = true
+		More.Visible = true
+		MoreButton.Text = settings.Strings.Less
+		if BackgroundVisible then
+			BackgroundMore.Visible = true
+		end
+	end
+end)
+
+ShowBackground.MouseButton1Click:Connect(function()
+	if BackgroundVisible then
+		BackgroundVisible = false
+		Background.BackgroundTransparency = 1
+		BackgroundMore.Visible = false
+		ShowBackground.Text = settings.Strings.Showback
+	else
+		BackgroundVisible = true
+		Background.BackgroundTransparency = 0.5
+		if MoreVisible then
+			BackgroundMore.Visible = true
+		end
+		ShowBackground.Text = settings.Strings.Hideback
+	end
+end)
+
+function loop()
+	local con = nil
+	while MoveButton.MouseButton1Up:Wait() do
+		local pressed = false
+		local offset = UIS:GetMouseLocation().X
+		local cur = Main.Position.X.Offset
+		con = UIS.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				pressed = true
+				if con then
+					con:Disconnect()
+				end
+			end
+		end)
+		while not pressed do
+			RS.RenderStepped:Wait()
+			Main.Position = UDim2.new(0, cur + (UIS:GetMouseLocation().X - offset), 0, 0)
+		end
+	end
+end
+
+coroutine.resume(coroutine.create(loop))
+
+local RSavg = {}
+local Pavg = {}
+local Havg = {}
+
+RS.RenderStepped:Connect(function(d)
+	table.insert(RSavg, d)
+	if #RSavg > settings.AverageCalculationAmount then
+		table.remove(RSavg, 1)
+	end
+	local t = 0
+	for _, n in pairs(RSavg) do
+		t = t + 1 / n
+	end
+	local fps = t / #RSavg
+	FPSlabel.TextColor3 = getColor(fps)
+	FPSlabel.Text = "FPS: "..tostring(fps)
+	RSlabel.TextColor3 = getColor(fps)
+	RSlabel.Text = "RenderStepped: "..tostring(fps)
+	
+	Background.Size = UDim2.new(0, 235, 0, 28)
+	BackgroundMore.Size = UDim2.new(0, 235, 0, 67)
+end)
+
+RS.Heartbeat:Connect(function(d)
+	table.insert(Havg, d)
+	if #Havg > settings.AverageCalculationAmount then
+		table.remove(Havg, 1)
+	end
+	local t = 0
+	for _, n in pairs(Havg) do
+		t = t + 1 / n
+	end
+	local fps = t / #Havg
+	Hlabel.TextColor3 = getColor(fps)
+	Hlabel.Text = "Heartbeat: "..tostring(fps)
+end)
+
+RS.Stepped:Connect(function(not_delta_so_idc, d)
+	table.insert(Pavg, d)
+	if #Pavg > settings.AverageCalculationAmount then
+		table.remove(Pavg, 1)
+	end
+	local t = 0
+	for _, n in pairs(Pavg) do
+		t = t + 1 / n
+	end
+	local fps = t / #Pavg
+	Plabel.TextColor3 = getColor(fps)
+	Plabel.Text = "Physics: "..tostring(fps)
+end)
