@@ -24,19 +24,36 @@ local settings = {
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local PARENT = game:GetService("CoreGui")
+local JSON = game:GetService("HttpService")
 local BackgroundVisible = false
 local MoreVisible = false
 
 local FPScounter = Instance.new("ScreenGui")
 local Options = Instance.new("Frame")
+local Optionshb = Instance.new("Frame")
 local ShowBackground = Instance.new("TextButton")
 local MoreButton = Instance.new("TextButton")
 local MoveButton = Instance.new("TextButton")
+local LoadButton = Instance.new("TextButton")
+local SaveButton = Instance.new("TextButton")
+local LoadButtons = {}
+local LoadDefault = Instance.new("TextButton")
+local SaveButtons = {}
 local Main = Instance.new("Frame")
+local SettingsFrame = Instance.new("Frame")
+local Close = Instance.new("TextButton")
+
+local EnterBad = Instance.new("TextBox")
+local EnterOk = Instance.new("TextBox")
+local EnterGood = Instance.new("TextBox")
+local EnterSuper = Instance.new("TextBox")
+local EnterGodly = Instance.new("TextBox")
+
 local Background = Instance.new("Frame")
 local BackgroundMore = Instance.new("Frame")
 local FPSlabel = Instance.new("TextLabel")
 local More = Instance.new("Frame")
+local SettingsButton = Instance.new("TextButton")
 local Plabel = Instance.new("TextLabel")
 local Hlabel = Instance.new("TextLabel")
 local RSlabel = Instance.new("TextLabel")
@@ -50,9 +67,18 @@ Options.Parent = FPScounter
 Options.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Options.BackgroundTransparency = 1.000
 Options.Position = UDim2.new(0.208000004, 0, 0, 18)
-Options.Size = UDim2.new(0, 100, 0, 60)
+Options.Size = UDim2.new(0, 100, 0, 120)
 Options.ZIndex = 2
 Options.Visible = false
+
+Optionshb.Name = "OptionsHB"
+Optionshb.Parent = Options
+Optionshb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Optionshb.BackgroundTransparency = 1
+Optionshb.Position = UDim2.new(0, 99, 0, 60)
+Optionshb.Size = UDim2.new(0, 101, 0, 140)
+Optionshb.ZIndex = 2
+Optionshb.Visible = false
 
 ShowBackground.Name = "ShowBackground"
 ShowBackground.Parent = Options
@@ -89,11 +115,180 @@ MoveButton.Text = settings.Strings.Move
 MoveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 MoveButton.TextSize = 14.000
 
+LoadButton.Name = "LoadButton"
+LoadButton.Parent = Options
+LoadButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+LoadButton.BackgroundTransparency = 0.500
+LoadButton.BorderSizePixel = 0
+LoadButton.Position = UDim2.new(0, 0, 0, 80)
+LoadButton.Size = UDim2.new(1, 0, 0, 20)
+LoadButton.Font = Enum.Font.SourceSans
+LoadButton.Text = "Load from..."
+LoadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadButton.TextSize = 14.000
+
+SaveButton.Name = "SaveButton"
+SaveButton.Parent = Options
+SaveButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+SaveButton.BackgroundTransparency = 0.500
+SaveButton.BorderSizePixel = 0
+SaveButton.Position = UDim2.new(0, 0, 0, 60)
+SaveButton.Size = UDim2.new(1, 0, 0, 20)
+SaveButton.Font = Enum.Font.SourceSans
+SaveButton.Text = "Save to..."
+SaveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveButton.TextSize = 14.000
+
+for i = 1, 5 do
+	local button = Instance.new("TextButton")
+	button.Name = "SaveButton"
+	button.Parent = Options
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	button.BackgroundTransparency = 0.5
+	button.BorderSizePixel = 0
+	button.Position = UDim2.new(1, 0, 0, 40 + (20 * i))
+	button.Size = UDim2.new(1, 0, 0, 20)
+	button.Font = Enum.Font.SourceSans
+	button.Text = "Slot "..i
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.TextSize = 14.000
+	button.Visible = false
+	table.insert(SaveButtons, button)
+end
+
+for i = 1, 5 do
+	local button = Instance.new("TextButton")
+	button.Name = "LoadButton"
+	button.Parent = Options
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	button.BackgroundTransparency = 0.5
+	button.BorderSizePixel = 0
+	button.Position = UDim2.new(1, 0, 0, 60 + (20 * i))
+	button.Size = UDim2.new(1, 0, 0, 20)
+	button.Font = Enum.Font.SourceSans
+	button.Text = "Slot "..i
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.TextSize = 14.000
+	button.Visible = false
+	table.insert(LoadButtons, button)
+end
+
+LoadDefault.Name = "LoadDefault"
+LoadDefault.Parent = Options
+LoadDefault.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+LoadDefault.BackgroundTransparency = 0.5
+LoadDefault.BorderSizePixel = 0
+LoadDefault.Position = UDim2.new(1, 0, 0, 180)
+LoadDefault.Size = UDim2.new(1, 0, 0, 20)
+LoadDefault.Font = Enum.Font.SourceSans
+LoadDefault.Text = "Default"
+LoadDefault.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadDefault.TextSize = 14.000
+LoadDefault.Visible = false
+table.insert(LoadButtons, LoadDefault)
+
 Main.Name = "Main"
 Main.Parent = FPScounter
 Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Main.BackgroundTransparency = 1.000
 Main.Size = UDim2.new(1, 0, 1, 0)
+
+SettingsFrame.Name = "SettingsFrame"
+SettingsFrame.Parent = FPScounter
+SettingsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+SettingsFrame.BackgroundTransparency = 0.5
+SettingsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+SettingsFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+SettingsFrame.BorderSizePixel = 0
+SettingsFrame.Size = UDim2.new(0, 500, 0, 300)
+
+Close.Name = "Close"
+Close.Parent = SettingsFrame
+Close.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Close.BackgroundTransparency = 0.5
+Close.BorderSizePixel = 0
+Close.Position = UDim2.new(1, 0, 0, 0)
+Close.AnchorPoint = Vector2.new(1, 0)
+Close.Size = UDim2.new(0, 20, 0, 20)
+Close.Font = Enum.Font.SourceSans
+Close.Text = ""
+Close.TextColor3 = Color3.fromRGB(255, 255, 255)
+Close.TextSize = 14.000
+
+EnterBad.Name = "EnterBad"
+EnterBad.Parent = SettingsFrame
+EnterBad.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EnterBad.BackgroundTransparency = 0.5
+EnterBad.BorderSizePixel = 0
+EnterBad.Position = UDim2.new(0, 20, 0, 52)
+EnterBad.Size = UDim2.new(0, 60, 0, 26)
+EnterBad.Font = Enum.Font.SourceSans
+EnterBad.PlaceholderText = "Bad color"
+EnterBad.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+EnterBad.TextColor3 = Color3.fromRGB(212, 34, 34)
+EnterBad.TextSize = 14
+EnterBad.Text = "212 34 34"
+EnterBad.ClearTextOnFocus = false
+
+EnterOk.Name = "EnterOk"
+EnterOk.Parent = SettingsFrame
+EnterOk.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EnterOk.BackgroundTransparency = 0.5
+EnterOk.BorderSizePixel = 0
+EnterOk.Position = UDim2.new(0, 20, 0, 104)
+EnterOk.Size = UDim2.new(0, 60, 0, 26)
+EnterOk.Font = Enum.Font.SourceSans
+EnterOk.PlaceholderText = "Ok color"
+EnterOk.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+EnterOk.TextColor3 = Color3.fromRGB(235, 232, 9)
+EnterOk.TextSize = 14
+EnterOk.Text = "235 232 9"
+EnterOk.ClearTextOnFocus = false
+
+EnterGood.Name = "EnterGood"
+EnterGood.Parent = SettingsFrame
+EnterGood.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EnterGood.BackgroundTransparency = 0.5
+EnterGood.BorderSizePixel = 0
+EnterGood.Position = UDim2.new(0, 20, 0, 156)
+EnterGood.Size = UDim2.new(0, 60, 0, 26)
+EnterGood.Font = Enum.Font.SourceSans
+EnterGood.PlaceholderText = "Good color"
+EnterGood.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+EnterGood.TextColor3 = Color3.fromRGB(32, 232, 86)
+EnterGood.TextSize = 14
+EnterGood.Text = "32 232 86"
+EnterGood.ClearTextOnFocus = false
+
+EnterSuper.Name = "EnterSuper"
+EnterSuper.Parent = SettingsFrame
+EnterSuper.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EnterSuper.BackgroundTransparency = 0.5
+EnterSuper.BorderSizePixel = 0
+EnterSuper.Position = UDim2.new(0, 20, 0, 208)
+EnterSuper.Size = UDim2.new(0, 60, 0, 26)
+EnterSuper.Font = Enum.Font.SourceSans
+EnterSuper.PlaceholderText = "Super color"
+EnterSuper.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+EnterSuper.TextColor3 = Color3.fromRGB(52, 232, 235)
+EnterSuper.TextSize = 14
+EnterSuper.Text = "52 232 235"
+EnterSuper.ClearTextOnFocus = false
+
+EnterGodly.Name = "EnterGodly"
+EnterGodly.Parent = SettingsFrame
+EnterGodly.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EnterGodly.BackgroundTransparency = 0.5
+EnterGodly.BorderSizePixel = 0
+EnterGodly.Position = UDim2.new(0, 20, 0, 260)
+EnterGodly.Size = UDim2.new(0, 60, 0, 26)
+EnterGodly.Font = Enum.Font.SourceSans
+EnterGodly.PlaceholderText = "Godly color"
+EnterGodly.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+EnterGodly.TextColor3 = Color3.fromRGB(210, 77, 219)
+EnterGodly.TextSize = 14
+EnterGodly.Text = "210 77 219"
+EnterGodly.ClearTextOnFocus = false
 
 Background.Name = "Background"
 Background.Parent = Main
@@ -128,6 +323,18 @@ More.BackgroundTransparency = 1.000
 More.Position = UDim2.new(0, 110, 0, 30)
 More.Size = UDim2.new(1, -110, 0, 54)
 More.Visible = false
+
+SettingsButton.Name = "SettingsButton"
+SettingsButton.Parent = Options
+SettingsButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+SettingsButton.BackgroundTransparency = 0.500
+SettingsButton.BorderSizePixel = 0
+SettingsButton.Position = UDim2.new(0, 0, 0, 100)
+SettingsButton.Size = UDim2.new(1, 0, 0, 20)
+SettingsButton.Font = Enum.Font.SourceSans
+SettingsButton.Text = "Settings"
+SettingsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SettingsButton.TextSize = 14.000
 
 Plabel.Name = "Plabel"
 Plabel.Parent = More
@@ -187,16 +394,151 @@ function getColor(num)
 	return color
 end
 
+function toggleItems(insts, bool)
+	for _, inst in pairs(insts) do
+		if bool ~= nil then
+			inst.Visible = bool
+		else
+			inst.Visible = not inst.Visible
+		end
+	end
+end
+
+local structure = {
+	["current"] = 0,
+	["saves"] = {
+		[1] = {
+			["colors"] = {
+				["Bad"] = Color3.fromRGB(212, 34, 34),
+				["Ok"] = Color3.fromRGB(235, 232, 9),
+				["Good"] = Color3.fromRGB(32, 232, 86),
+				["Super"] = Color3.fromRGB(52, 232, 235),
+				["Godly"] = Color3.fromRGB(210, 77, 219)
+			},
+			["average"] = 5
+		},
+		[2] = {
+			["colors"] = {
+				["Bad"] = Color3.fromRGB(212, 34, 34),
+				["Ok"] = Color3.fromRGB(235, 232, 9),
+				["Good"] = Color3.fromRGB(32, 232, 86),
+				["Super"] = Color3.fromRGB(52, 232, 235),
+				["Godly"] = Color3.fromRGB(210, 77, 219)
+			},
+			["average"] = 5
+		},
+		[3] = {
+			["colors"] = {
+				["Bad"] = Color3.fromRGB(212, 34, 34),
+				["Ok"] = Color3.fromRGB(235, 232, 9),
+				["Good"] = Color3.fromRGB(32, 232, 86),
+				["Super"] = Color3.fromRGB(52, 232, 235),
+				["Godly"] = Color3.fromRGB(210, 77, 219)
+			},
+			["average"] = 5
+		},
+		[4] = {
+			["colors"] = {
+				["Bad"] = Color3.fromRGB(212, 34, 34),
+				["Ok"] = Color3.fromRGB(235, 232, 9),
+				["Good"] = Color3.fromRGB(32, 232, 86),
+					["Super"] = Color3.fromRGB(52, 232, 235),
+			["Godly"] = Color3.fromRGB(210, 77, 219)
+			},
+			["average"] = 5
+		},
+		[5] = {
+			["colors"] = {
+				["Bad"] = Color3.fromRGB(212, 34, 34),
+				["Ok"] = Color3.fromRGB(235, 232, 9),
+				["Good"] = Color3.fromRGB(32, 232, 86),
+				["Super"] = Color3.fromRGB(52, 232, 235),
+				["Godly"] = Color3.fromRGB(210, 77, 219)
+			},
+			["average"] = 5
+		},
+	}
+}
+
+local default = {
+	["colors"] = {
+		["Bad"] = Color3.fromRGB(212, 34, 34),
+		["Ok"] = Color3.fromRGB(235, 232, 9),
+		["Good"] = Color3.fromRGB(32, 232, 86),
+		["Super"] = Color3.fromRGB(52, 232, 235),
+		["Godly"] = Color3.fromRGB(210, 77, 219)
+	},
+	["average"] = 5
+}
+
+if not isfile("FPSsave.txt") then
+	writefile("FPSsave.txt", JSON:JSONEncode(structure))
+end
+
+function slots(id, write, data)
+	local file = JSON:JSONDecode(readfile("FPSsave.txt"))
+	if write then
+		file["saves"][id] = data
+		file["current"] = id
+		writefile("FPSsave.txt", JSON:JSONEncode(file))
+	else
+		if id == 0 then
+			return default
+		else
+			return file["saves"][id]
+		end
+	end
+end
+
+local options1 = false
+local options2 = false
 Background.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 then
 		local pos = UIS:GetMouseLocation()
 		Options.Position = UDim2.new(0, pos.X - 1, 0, pos.Y + 1)
 		Options.Visible = true
+		Optionshb.Visible = true
+		options1, options2 = false, false
 	end
 end)
 
+function update()
+	if not (options1 or options2) then
+		Options.Visible = false
+		Optionshb.Visible = false
+		toggleItems(LoadButtons, false)
+		toggleItems(SaveButtons, false)
+	end
+end
+
 Options.MouseLeave:Connect(function()
-	Options.Visible = false
+	options1 = false
+	update()
+end)
+
+Options.MouseEnter:Connect(function()
+	options1 = true
+end)
+
+Optionshb.MouseLeave:Connect(function()
+	options2 = false
+	update()
+end)
+
+Optionshb.MouseEnter:Connect(function()
+	options2 = true
+end)
+
+LoadButton.MouseButton1Click:Connect(function()
+	toggleItems(LoadButtons)
+	toggleItems(SaveButtons, false)
+	Optionshb.Visible = LoadButtons[1].Visible
+end)
+
+SaveButton.MouseButton1Click:Connect(function()
+	toggleItems(SaveButtons)
+	toggleItems(LoadButtons, false)
+	Optionshb.Visible = SaveButtons[1].Visible
 end)
 
 MoreButton.MouseButton1Click:Connect(function()
