@@ -1,4 +1,14 @@
--- TIP: Right click the FPS counter for options
+-- EXPLOIT REQUIREMENTS:
+
+-- Must include (readfile) and (writefile) functions
+-- Synapse X (syn.protect_gui) for gui protection
+
+-- TIPS: 
+
+-- Right click the FPS counter for options
+
+-- If FPS counter is acting up, delet the save file in workspace folder (FPSsave.txt)
+-- You can also execute 'delfile("FPSsave.txt")' to delet it
 
 -- Credits:
 -- "Gui to Lua" plugin for gui
@@ -464,7 +474,6 @@ function colorToString(clr)
 	return table.concat({r, g, b}, " ")
 end
 
-local lastavg = 5
 function updateSettings()
 	local badc = stringToColor(EnterBad.Text)
 	local okc = stringToColor(EnterOk.Text)
@@ -488,6 +497,7 @@ function updateSettings()
 end
 
 function displaySettings()
+print(settings.colors.Bad,settings.colors.Ok)
 	local bads = colorToString(settings.colors.Bad)
 	local oks = colorToString(settings.colors.Ok)
 	local goods = colorToString(settings.colors.Good)
@@ -518,51 +528,51 @@ local structure = {
 	["saves"] = {
 		[1] = {
 			["colors"] = {
-				["Bad"] = Color3.fromRGB(212, 34, 34),
-				["Ok"] = Color3.fromRGB(235, 232, 9),
-				["Good"] = Color3.fromRGB(32, 232, 86),
-				["Super"] = Color3.fromRGB(52, 232, 235),
-				["Godly"] = Color3.fromRGB(210, 77, 219)
+				["Bad"] = {0.83137254901961, 0.13333333333333, 0.13333333333333},
+				["Ok"] = {0.92156862745098, 0.90980392156863, 0.035294117647059},
+				["Good"] = {0.12549019607843, 0.90980392156863, 0.33725490196078},
+				["Super"] = {0.20392156862745, 0.90980392156863, 0.92156862745098},
+				["Godly"] = {0.82352941176471, 0.30196078431373, 0.85882352941176}
 			},
 			["average"] = 5
 		},
 		[2] = {
 			["colors"] = {
-				["Bad"] = Color3.fromRGB(212, 34, 34),
-				["Ok"] = Color3.fromRGB(235, 232, 9),
-				["Good"] = Color3.fromRGB(32, 232, 86),
-				["Super"] = Color3.fromRGB(52, 232, 235),
-				["Godly"] = Color3.fromRGB(210, 77, 219)
+				["Bad"] = {0.83137254901961, 0.13333333333333, 0.13333333333333},
+				["Ok"] = {0.92156862745098, 0.90980392156863, 0.035294117647059},
+				["Good"] = {0.12549019607843, 0.90980392156863, 0.33725490196078},
+				["Super"] = {0.20392156862745, 0.90980392156863, 0.92156862745098},
+				["Godly"] = {0.82352941176471, 0.30196078431373, 0.85882352941176}
 			},
 			["average"] = 5
 		},
 		[3] = {
 			["colors"] = {
-				["Bad"] = Color3.fromRGB(212, 34, 34),
-				["Ok"] = Color3.fromRGB(235, 232, 9),
-				["Good"] = Color3.fromRGB(32, 232, 86),
-				["Super"] = Color3.fromRGB(52, 232, 235),
-				["Godly"] = Color3.fromRGB(210, 77, 219)
+				["Bad"] = {0.83137254901961, 0.13333333333333, 0.13333333333333},
+				["Ok"] = {0.92156862745098, 0.90980392156863, 0.035294117647059},
+				["Good"] = {0.12549019607843, 0.90980392156863, 0.33725490196078},
+				["Super"] = {0.20392156862745, 0.90980392156863, 0.92156862745098},
+				["Godly"] = {0.82352941176471, 0.30196078431373, 0.85882352941176}
 			},
 			["average"] = 5
 		},
 		[4] = {
 			["colors"] = {
-				["Bad"] = Color3.fromRGB(212, 34, 34),
-				["Ok"] = Color3.fromRGB(235, 232, 9),
-				["Good"] = Color3.fromRGB(32, 232, 86),
-				["Super"] = Color3.fromRGB(52, 232, 235),
-				["Godly"] = Color3.fromRGB(210, 77, 219)
+				["Bad"] = {0.83137254901961, 0.13333333333333, 0.13333333333333},
+				["Ok"] = {0.92156862745098, 0.90980392156863, 0.035294117647059},
+				["Good"] = {0.12549019607843, 0.90980392156863, 0.33725490196078},
+				["Super"] = {0.20392156862745, 0.90980392156863, 0.92156862745098},
+				["Godly"] = {0.82352941176471, 0.30196078431373, 0.85882352941176}
 			},
 			["average"] = 5
 		},
 		[5] = {
 			["colors"] = {
-				["Bad"] = Color3.fromRGB(212, 34, 34),
-				["Ok"] = Color3.fromRGB(235, 232, 9),
-				["Good"] = Color3.fromRGB(32, 232, 86),
-				["Super"] = Color3.fromRGB(52, 232, 235),
-				["Godly"] = Color3.fromRGB(210, 77, 219)
+				["Bad"] = {0.83137254901961, 0.13333333333333, 0.13333333333333},
+				["Ok"] = {0.92156862745098, 0.90980392156863, 0.035294117647059},
+				["Good"] = {0.12549019607843, 0.90980392156863, 0.33725490196078},
+				["Super"] = {0.20392156862745, 0.90980392156863, 0.92156862745098},
+				["Godly"] = {0.82352941176471, 0.30196078431373, 0.85882352941176}
 			},
 			["average"] = 5
 		},
@@ -579,6 +589,7 @@ local default = {
 	},
 	["average"] = 5
 }
+table.freeze(default)
 
 if not isfile("FPSsave.txt") then
 	writefile("FPSsave.txt", JSON:JSONEncode(structure))
@@ -601,7 +612,7 @@ end
 
 function load(id)
 	local data = slots(id, false)
-	if type(settings.Colors) == "userdata" then
+	if type(settings.colors) == "userdata" or id == 0 then
 		settings.colors = default.colors
 	else
 		local converted = {}
