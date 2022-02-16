@@ -3,16 +3,18 @@
 -- Credits:
 -- "Gui to Lua" plugin for gui
 
+-- EDITING VALUES BELOW THIS LINE CAN BREAK FPS COUNTER
+
 local settings = {
-	["AverageCalculationAmount"] = 5, -- The amount of numbers used to get the average (higher the smoother but slower)
-	["Colors"] = { -- The colors for each state (in RGB)
+	["average"] = 5,
+	["colors"] = {
 		["Bad"] = Color3.fromRGB(212, 34, 34),
 		["Ok"] = Color3.fromRGB(235, 232, 9),
 		["Good"] = Color3.fromRGB(32, 232, 86),
 		["Super"] = Color3.fromRGB(52, 232, 235),
 		["Godly"] = Color3.fromRGB(210, 77, 219)
 	},
-	["Strings"] = { -- What the options buttons will display
+	["strings"] = {
 		["Less"] = "Show less",
 		["More"] = "Show more",
 		["Move"] = "Move",
@@ -39,6 +41,8 @@ local SaveButton = Instance.new("TextButton")
 local LoadButtons = {}
 local LoadDefault = Instance.new("TextButton")
 local SaveButtons = {}
+local SettingsLabel = Instance.new("TextLabel")
+local SettingsLabel_2 = Instance.new("TextLabel")
 local Main = Instance.new("Frame")
 local SettingsFrame = Instance.new("Frame")
 local Close = Instance.new("TextButton")
@@ -48,6 +52,7 @@ local EnterOk = Instance.new("TextBox")
 local EnterGood = Instance.new("TextBox")
 local EnterSuper = Instance.new("TextBox")
 local EnterGodly = Instance.new("TextBox")
+local EnterAverage = Instance.new("TextBox")
 
 local Background = Instance.new("Frame")
 local BackgroundMore = Instance.new("Frame")
@@ -87,7 +92,7 @@ ShowBackground.BackgroundTransparency = 0.500
 ShowBackground.BorderSizePixel = 0
 ShowBackground.Size = UDim2.new(1, 0, 0, 20)
 ShowBackground.Font = Enum.Font.SourceSans
-ShowBackground.Text = settings.Strings.Showback
+ShowBackground.Text = settings.strings.Showback
 ShowBackground.TextColor3 = Color3.fromRGB(255, 255, 255)
 ShowBackground.TextSize = 14.000
 
@@ -99,7 +104,7 @@ MoreButton.BorderSizePixel = 0
 MoreButton.Position = UDim2.new(0, 0, 0, 20)
 MoreButton.Size = UDim2.new(1, 0, 0, 20)
 MoreButton.Font = Enum.Font.SourceSans
-MoreButton.Text = settings.Strings.More
+MoreButton.Text = settings.strings.More
 MoreButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 MoreButton.TextSize = 14.000
 
@@ -111,7 +116,7 @@ MoveButton.BorderSizePixel = 0
 MoveButton.Position = UDim2.new(0, 0, 0, 40)
 MoveButton.Size = UDim2.new(1, 0, 0, 20)
 MoveButton.Font = Enum.Font.SourceSans
-MoveButton.Text = settings.Strings.Move
+MoveButton.Text = settings.strings.Move
 MoveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 MoveButton.TextSize = 14.000
 
@@ -153,6 +158,9 @@ for i = 1, 5 do
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.TextSize = 14.000
 	button.Visible = false
+	button.MouseButton1Click:Connect(function()
+		save(i)
+	end)
 	table.insert(SaveButtons, button)
 end
 
@@ -170,6 +178,9 @@ for i = 1, 5 do
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.TextSize = 14.000
 	button.Visible = false
+	button.MouseButton1Click:Connect(function()
+		load(i)
+	end)
 	table.insert(LoadButtons, button)
 end
 
@@ -185,7 +196,48 @@ LoadDefault.Text = "Default"
 LoadDefault.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoadDefault.TextSize = 14.000
 LoadDefault.Visible = false
+LoadDefault.MouseButton1Click:Connect(function()
+	load(0)
+end)
 table.insert(LoadButtons, LoadDefault)
+
+SettingsLabel.Name = "SettingsLabel"
+SettingsLabel.Parent = SettingsFrame
+SettingsLabel.BackgroundTransparency = 1
+SettingsLabel.BorderSizePixel = 0
+SettingsLabel.Position = UDim2.new(0, 20, 0, 20)
+SettingsLabel.Size = UDim2.new(1, 0, 0, 20)
+SettingsLabel.Font = Enum.Font.SourceSans
+SettingsLabel.TextXAlignment = "Left"
+SettingsLabel.Text = " Colors (eg: 255 255 255)"
+SettingsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+SettingsLabel.TextSize = 14.000
+
+SettingsLabel_2.Name = "SettingsLabel_2"
+SettingsLabel_2.Parent = SettingsFrame
+SettingsLabel_2.BackgroundTransparency = 1
+SettingsLabel_2.BorderSizePixel = 0
+SettingsLabel_2.Position = UDim2.new(0.5, 20, 0, 20)
+SettingsLabel_2.Size = UDim2.new(1, 0, 0, 20)
+SettingsLabel_2.Font = Enum.Font.SourceSans
+SettingsLabel_2.TextXAlignment = "Left"
+SettingsLabel_2.Text = "Average calculation amount"
+SettingsLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+SettingsLabel_2.TextSize = 14.000
+
+EnterAverage.Name = "EnterAverage"
+EnterAverage.Parent = SettingsFrame
+EnterAverage.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EnterAverage.BackgroundTransparency = 0.5
+EnterAverage.BorderSizePixel = 0
+EnterAverage.Position = UDim2.new(0.5, 20, 0, 52)
+EnterAverage.Size = UDim2.new(0, 60, 0, 26)
+EnterAverage.Font = Enum.Font.SourceSans
+EnterAverage.PlaceholderText = "Average"
+EnterAverage.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+EnterAverage.Text = "5"
+EnterAverage.TextColor3 = Color3.fromRGB(255, 255, 255)
+EnterAverage.TextSize = 14.000
 
 Main.Name = "Main"
 Main.Parent = FPScounter
@@ -201,6 +253,7 @@ SettingsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 SettingsFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 SettingsFrame.BorderSizePixel = 0
 SettingsFrame.Size = UDim2.new(0, 500, 0, 300)
+SettingsFrame.Visible = false
 
 Close.Name = "Close"
 Close.Parent = SettingsFrame
@@ -379,19 +432,75 @@ end
 FPScounter.Parent = PARENT
 
 function getColor(num)
-	local color = settings.Colors.Bad
+	local color = settings.colors.Bad
 	if num > 150 then
-		color = settings.Colors.Godly
+		color = settings.colors.Godly
 	elseif num > 80 then
-		color = settings.Colors.Super
+		color = settings.colors.Super
 	elseif num > 40 then
-		color = settings.Colors.Good
+		color = settings.colors.Good
 	elseif num > 20 then
-		color = settings.Colors.Ok
+		color = settings.colors.Ok
 	else
-		color = settings.Colors.Bad
+		color = settings.colors.Bad
 	end
 	return color
+end
+
+function stringToColor(str)
+	local values = str:split(" ")
+	local r, g, b = values[1], values[2], values[3]
+	r, g, b = tonumber(r), tonumber(g), tonumber(b)
+	if r and g and b then
+		return Color3.fromRGB(r, g, b)
+	else
+		return Color3.new(0, 0, 0)
+	end
+end
+
+function colorToString(clr)
+	local r, g, b = clr.R, clr.G, clr.B
+	r, g, b = math.floor(r * 255), math.floor(g * 255), math.floor(b * 255)
+	return table.concat({r, g, b}, " ")
+end
+
+local lastavg = 5
+function updateSettings()
+	local badc = stringToColor(EnterBad.Text)
+	local okc = stringToColor(EnterOk.Text)
+	local goodc = stringToColor(EnterGood.Text)
+	local superc = stringToColor(EnterSuper.Text)
+	local godlyc = stringToColor(EnterGodly.Text)
+	local average = tonumber(EnterAverage.Text) or 5
+
+	EnterBad.TextColor3 = badc
+	EnterOk.TextColor3 = okc
+	EnterGood.TextColor3 = goodc
+	EnterSuper.TextColor3 = superc
+	EnterGodly.TextColor3 = godlyc
+
+	settings.colors.Bad = badc
+	settings.colors.Ok = okc
+	settings.colors.Good = goodc
+	settings.colors.Super = superc
+	settings.colors.Godly = godlyc
+	settings.average = math.floor(math.max(1, average) + 0.5)
+end
+
+function displaySettings()
+	local bads = colorToString(settings.colors.Bad)
+	local oks = colorToString(settings.colors.Ok)
+	local goods = colorToString(settings.colors.Good)
+	local supers = colorToString(settings.colors.Super)
+	local godlys = colorToString(settings.colors.Godly)
+	local average = settings.average
+
+	EnterBad.Text = bads
+	EnterOk.Text = oks
+	EnterGood.Text = goods
+	EnterSuper.Text = supers
+	EnterGodly.Text = godlys
+	EnterAverage.Text = tostring(average)
 end
 
 function toggleItems(insts, bool)
@@ -442,8 +551,8 @@ local structure = {
 				["Bad"] = Color3.fromRGB(212, 34, 34),
 				["Ok"] = Color3.fromRGB(235, 232, 9),
 				["Good"] = Color3.fromRGB(32, 232, 86),
-					["Super"] = Color3.fromRGB(52, 232, 235),
-			["Godly"] = Color3.fromRGB(210, 77, 219)
+				["Super"] = Color3.fromRGB(52, 232, 235),
+				["Godly"] = Color3.fromRGB(210, 77, 219)
 			},
 			["average"] = 5
 		},
@@ -489,6 +598,41 @@ function slots(id, write, data)
 		end
 	end
 end
+
+function load(id)
+	local data = slots(id, false)
+	if type(settings.Colors) == "userdata" then
+		settings.colors = default.colors
+	else
+		local converted = {}
+		for name, v in pairs(data.colors) do
+			converted[name] = Color3.new(v[1], v[2], v[3])
+		end
+		settings.colors = converted
+	end
+	settings.average = data.average
+	displaySettings()
+end
+
+function save(id)
+	local data = settings
+	local converted = {}
+	for name, c in pairs(settings.colors) do
+		converted[name] = {c.R, c.G, c.B}
+	end
+	local average = settings.average
+	slots(id, true, {
+		["colors"] = converted,
+		["average"] = average
+	})
+end
+
+function toggleSettings()
+	SettingsFrame.Visible = not SettingsFrame.Visible
+end
+
+SettingsButton.MouseButton1Click:Connect(toggleSettings)
+Close.MouseButton1Click:Connect(toggleSettings)
 
 local options1 = false
 local options2 = false
@@ -545,12 +689,12 @@ MoreButton.MouseButton1Click:Connect(function()
 	if MoreVisible then
 		MoreVisible = false
 		More.Visible = false
-		MoreButton.Text = settings.Strings.More
+		MoreButton.Text = settings.strings.More
 		BackgroundMore.Visible = false
 	else
 		MoreVisible = true
 		More.Visible = true
-		MoreButton.Text = settings.Strings.Less
+		MoreButton.Text = settings.strings.Less
 		if BackgroundVisible then
 			BackgroundMore.Visible = true
 		end
@@ -562,14 +706,14 @@ ShowBackground.MouseButton1Click:Connect(function()
 		BackgroundVisible = false
 		Background.BackgroundTransparency = 1
 		BackgroundMore.Visible = false
-		ShowBackground.Text = settings.Strings.Showback
+		ShowBackground.Text = settings.strings.Showback
 	else
 		BackgroundVisible = true
 		Background.BackgroundTransparency = 0.5
 		if MoreVisible then
 			BackgroundMore.Visible = true
 		end
-		ShowBackground.Text = settings.Strings.Hideback
+		ShowBackground.Text = settings.strings.Hideback
 	end
 end)
 
@@ -600,11 +744,19 @@ local RSavg = {}
 local Pavg = {}
 local Havg = {}
 
-RS.RenderStepped:Connect(function(d)
-	table.insert(RSavg, d)
-	if #RSavg > settings.AverageCalculationAmount then
-		table.remove(RSavg, 1)
+function limitTable(t, l)
+	if (#t - l) > 0 then
+		for _ = 1, (#t - l) do
+			table.remove(t, 1)
+		end
 	end
+	return t
+end
+
+RS.RenderStepped:Connect(function(d)
+	updateSettings()
+	table.insert(RSavg, d)
+	limitTable(RSavg, settings.average)
 	local t = 0
 	for _, n in pairs(RSavg) do
 		t = t + 1 / n
@@ -621,9 +773,7 @@ end)
 
 RS.Heartbeat:Connect(function(d)
 	table.insert(Havg, d)
-	if #Havg > settings.AverageCalculationAmount then
-		table.remove(Havg, 1)
-	end
+	limitTable(Havg, settings.average)
 	local t = 0
 	for _, n in pairs(Havg) do
 		t = t + 1 / n
@@ -635,9 +785,7 @@ end)
 
 RS.Stepped:Connect(function(not_delta_so_idc, d)
 	table.insert(Pavg, d)
-	if #Pavg > settings.AverageCalculationAmount then
-		table.remove(Pavg, 1)
-	end
+	limitTable(Pavg, settings.average)
 	local t = 0
 	for _, n in pairs(Pavg) do
 		t = t + 1 / n
