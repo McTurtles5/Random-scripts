@@ -591,7 +591,20 @@ local default = {
 }
 table.freeze(default)
 
-if not isfile("FPSsave.txt") then
+local fakefile = ""
+local writefile = writefile
+local readfile = readfile
+
+if not readfile or not writefile then
+    readfile = function()
+        
+    end
+    writefile = function()
+        
+    end
+end
+
+if not (isfile and isfile("FPSsave.txt")) then
 	writefile("FPSsave.txt", JSON:JSONEncode(structure))
 end
 
