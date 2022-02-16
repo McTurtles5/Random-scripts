@@ -1,6 +1,6 @@
 -- EXPLOIT REQUIREMENTS:
 
--- Must include (readfile) and (writefile) to actaully save
+-- Must include (readfile) and (writefile) functions
 -- Synapse X (syn.protect_gui) for gui protection
 
 -- TIPS: 
@@ -540,8 +540,9 @@ local structure = {
 }
 
 for copy = 2, 5 do
-    structure["saves"][copy] = structure["saves"][1]
+	structure["saves"][copy] = structure["saves"][1]
 end
+table.freeze(structure)
 
 local default = {
 	["colors"] = {
@@ -560,15 +561,15 @@ local writefile = writefile
 local readfile = readfile
 
 if not readfile or not writefile then
-    readfile = function()
-        
-    end
-    writefile = function()
-        
-    end
+	readfile = function()
+		return fakefile
+	end
+	writefile = function(_, data)
+		fakefile = data
+	end
 end
 
-if not (isfile and isfile("FPSsave.txt")) then
+if not isfile("FPSsave.txt") then
 	writefile("FPSsave.txt", JSON:JSONEncode(structure))
 end
 
