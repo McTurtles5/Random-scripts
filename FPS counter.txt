@@ -1,6 +1,9 @@
+-- If true, save slots will save to the HDD or SSD. If false, saved settings will be cleared on re-execute
+local saveFilesToHDD = true
+
 -- EXPLOIT REQUIREMENTS:
 
--- Must include (readfile) and (writefile) functions
+-- Must include (readfile) and (writefile) functions to use (saveFilesToHDD)
 -- Synapse X (syn.protect_gui) for gui protection
 
 -- TIPS: 
@@ -458,6 +461,7 @@ function getColor(num)
 end
 
 function stringToColor(str)
+	str = table.concat(str:split(","), "")
 	local values = str:split(" ")
 	local r, g, b = values[1], values[2], values[3]
 	r, g, b = tonumber(r), tonumber(g), tonumber(b)
@@ -497,7 +501,6 @@ function updateSettings()
 end
 
 function displaySettings()
-print(settings.colors.Bad,settings.colors.Ok)
 	local bads = colorToString(settings.colors.Bad)
 	local oks = colorToString(settings.colors.Ok)
 	local goods = colorToString(settings.colors.Good)
@@ -559,13 +562,17 @@ table.freeze(default)
 local fakefile = ""
 local writefile = writefile
 local readfile = readfile
+local isfile = isfile
 
-if not readfile or not writefile then
+if (not readfile or not writefile or not isfile) or not saveFilesToHDD then
 	readfile = function()
 		return fakefile
 	end
 	writefile = function(_, data)
 		fakefile = data
+	end
+	isfile = function()
+		return false
 	end
 end
 
@@ -755,7 +762,7 @@ RS.RenderStepped:Connect(function(d)
 	FPSlabel.Text = "FPS: "..tostring(fps)
 	RSlabel.TextColor3 = getColor(fps)
 	RSlabel.Text = "RenderStepped: "..tostring(fps)
-	
+
 	Background.Size = UDim2.new(0, 235, 0, 28)
 	BackgroundMore.Size = UDim2.new(0, 235, 0, 67)
 end)
