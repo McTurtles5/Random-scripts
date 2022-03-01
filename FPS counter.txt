@@ -1,7 +1,7 @@
 -- If true, save slots will save to the HDD or SSD. If false, saved settings will be cleared on re-execute
 local saveFilesToHDD = true
 
--- EXPLOIT REQUIREMENTS:
+-- EXPLOIT RECCOMENDATION:
 
 -- Must include (readfile) and (writefile) functions to use (saveFilesToHDD)
 -- Synapse X (syn.protect_gui) for gui protection
