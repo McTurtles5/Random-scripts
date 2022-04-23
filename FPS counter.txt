@@ -1,4 +1,4 @@
--- If true, save slots will save to the HDD or SSD. If false, saved settings will be cleared on re-execute
+-- If true, save slots will save to the HDD in your workspace folder. If false, saved settings will be cleared on re-execute
 local saveFilesToHDD = true
 
 -- EXPLOIT RECCOMENDATION:
@@ -580,12 +580,20 @@ if not isfile("FPSsave.txt") then
 	writefile("FPSsave.txt", JSON:JSONEncode(structure))
 end
 
+function rawread()
+	return JSON:JSONDecode(readfile("FPSsave.txt"))
+end
+
+function rawwrite(data)
+	writefile("FPSsave.txt", JSON:JSONEncode(data))
+end
+
 function slots(id, write, data)
-	local file = JSON:JSONDecode(readfile("FPSsave.txt"))
+	local file = rawread()
 	if write then
 		file["saves"][id] = data
 		file["current"] = id
-		writefile("FPSsave.txt", JSON:JSONEncode(file))
+		rawwrite(file)
 	else
 		if id == 0 then
 			return default
@@ -606,6 +614,9 @@ function load(id)
 		end
 		settings.colors = converted
 	end
+	local data2 = rawread()
+	data2["current"] = id
+	rawwrite(data2)
 	settings.average = data.average
 	displaySettings()
 end
@@ -622,6 +633,8 @@ function save(id)
 		["average"] = average
 	})
 end
+
+load(rawread()["current"])
 
 function toggleSettings()
 	SettingsFrame.Visible = not SettingsFrame.Visible
