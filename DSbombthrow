@@ -1,22 +1,76 @@
--- (WIP)
-
-local player = game:GetService("Players").LocalPlayer
+local players = game:GetService("Players")
+local player = players.LocalPlayer
 local RS = game:GetService("RunService")
 local mouse = player:GetMouse()
 
 local bombname = player.Name.."'s Bomb"
 local folder = workspace.Projectiles.Active[player.Name]
 
+function notify(msg)
+	local h = Instance.new("Hint", workspace)
+	h.Text = msg
+	game:GetService("Debris"):AddItem(h, 0.8)
+end
+
+function Float(part, cframe)
+	local body = part:FindFirstChildOfClass("BodyPosition")
+	local gyro = part:FindFirstChildOfClass("BodyGyro")
+	for _, inst in pairs(part:GetChildren()) do
+		if inst:IsA("BodyPosition") or inst:IsA("BodyGyro") then
+			inst:Destroy()
+		end
+	end
+	body = Instance.new("BodyPosition", part)
+	body.Position = cframe.Position
+	body.P = part.Mass * (workspace.Gravity * 100)
+	body.D = part.Mass * workspace.Gravity
+	body.MaxForce = Vector3.new("inf", "inf", "inf")
+	gyro = Instance.new("BodyGyro", part)
+	gyro.CFrame = cframe
+	gyro.MaxTorque = Vector3.new("inf", "inf", "inf")
+	gyro.P = part.Mass * (workspace.Gravity * 100)
+	gyro.D = part.Mass * workspace.Gravity
+end
+
+function getPlayer(part)
+	return players:GetPlayerFromCharacter(part.Parent)
+end
+
+local throw = 1
+local stick = 1
+
+local throwstr = {"throw", "missle", "off"}
+local stickstr = {"all", "players", "off"}
+
+mouse.KeyDown:Connect(function(key)
+	if key == "f" then
+		stick = (stick < 3 and stick + 1) or 1
+		notify("stick: "..stickstr[stick])
+	elseif key == "g" then
+		throw = (throw < 3 and throw + 1) or 1
+		notify("throw: "..throwstr[throw])
+	end
+end)
+
 folder.ChildAdded:Connect(function(bomb)
 	if bomb.Name == bombname and bomb:IsA("Part") then
-		bomb.Velocity = mouse.Hit.LookVector * 200
+		if throw ~= 3 then
+			bomb.Velocity = mouse.Hit.LookVector * 200
+		end
+		if throw == 2 then
+			Instance.new("BodyForce", bomb).Force = Vector3.new(0, bomb.Mass * workspace.Gravity, 0)
+		end
 		local con = nil
 		con = bomb.Touched:Connect(function(hit)
-			local offset = bomb.CFrame * hit.CFrame:Inverse()
-			while hit and bomb do
-				RS.RenderStepped:Wait()
-				bomb.CFrame = offset * hit.CFrame
-				bomb.Velocity = Vector3.new(0, 0, 0)
+			if hit.CanCollide and getPlayer(hit) ~= player then
+				if stick == 1 or (stick == 2 and getPlayer(hit)) then
+					con:Disconnect()
+					local offset = hit.CFrame:Inverse() * bomb.CFrame
+					while hit and bomb do
+						RS.RenderStepped:Wait()
+						Float(bomb, hit.CFrame * offset)
+					end
+				end
 			end
 		end)
 	end
