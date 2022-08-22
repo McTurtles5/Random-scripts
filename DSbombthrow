@@ -1,0 +1,23 @@
+-- (WIP)
+
+local player = game:GetService("Players").LocalPlayer
+local RS = game:GetService("RunService")
+local mouse = player:GetMouse()
+
+local bombname = player.Name.."'s Bomb"
+local folder = workspace.Projectiles.Active[player.Name]
+
+folder.ChildAdded:Connect(function(bomb)
+	if bomb.Name == bombname and bomb:IsA("Part") then
+		bomb.Velocity = mouse.Hit.LookVector * 200
+		local con = nil
+		con = bomb.Touched:Connect(function(hit)
+			local offset = bomb.CFrame * hit.CFrame:Inverse()
+			while hit and bomb do
+				RS.RenderStepped:Wait()
+				bomb.CFrame = offset * hit.CFrame
+				bomb.Velocity = Vector3.new(0, 0, 0)
+			end
+		end)
+	end
+end)
