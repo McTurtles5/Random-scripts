@@ -1,3 +1,5 @@
+-- WIKI PAGE: https://github.com/McTurtles5/Random-scripts/wiki/FPS-counter
+
 -- If true, save slots will save to the HDD in your workspace folder. If false, saved settings will be cleared on re-execute
 local saveFilesToHDD = true
 
