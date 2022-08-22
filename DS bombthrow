@@ -1,3 +1,5 @@
+-- WIKI PAGE: https://github.com/McTurtles5/Random-scripts/wiki/DS-bombthrow
+
 local players = game:GetService("Players")
 local player = players.LocalPlayer
 local RS = game:GetService("RunService")
@@ -39,7 +41,7 @@ end
 local throw = 1
 local stick = 1
 
-local throwstr = {"throw", "missle", "off"}
+local throwstr = {"throw", "missile", "off"}
 local stickstr = {"all", "players", "off"}
 
 mouse.KeyDown:Connect(function(key)
