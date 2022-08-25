@@ -1,6 +1,6 @@
 -- WIKI PAGE: https://github.com/McTurtles5/Random-scripts/wiki/FPS-counter
 
--- If true, save slots will save to the HDD in your workspace folder. If false, saved settings will be cleared on re-execute
+-- If true, save slots will save to the HDD or SSD. If false, saved settings will be cleared on re-execute
 local saveFilesToHDD = true
 
 -- EXPLOIT RECCOMENDATION:
@@ -74,6 +74,7 @@ local BackgroundMore = Instance.new("Frame")
 local FPSlabel = Instance.new("TextLabel")
 local More = Instance.new("Frame")
 local SettingsButton = Instance.new("TextButton")
+local Slabel = Instance.new("TextLabel")
 local Plabel = Instance.new("TextLabel")
 local Hlabel = Instance.new("TextLabel")
 local RSlabel = Instance.new("TextLabel")
@@ -372,7 +373,7 @@ BackgroundMore.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 BackgroundMore.BackgroundTransparency = 0.500
 BackgroundMore.BorderSizePixel = 0
 BackgroundMore.Position = UDim2.new(0, 100, 0, 28)
-BackgroundMore.Size = UDim2.new(1, -100, 0, 67)
+BackgroundMore.Size = UDim2.new(1, -100, 0, 85)
 BackgroundMore.Visible = false
 
 FPSlabel.Name = "FPSlabel"
@@ -403,6 +404,15 @@ SettingsButton.Font = Enum.Font.SourceSans
 SettingsButton.Text = "Settings"
 SettingsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 SettingsButton.TextSize = 14.000
+
+Slabel.Name = "Slabel"
+Slabel.Parent = More
+Slabel.BackgroundTransparency = 1.000
+Slabel.Position = UDim2.new(0, 0, 0, 54)
+Slabel.Size = UDim2.new(1, 0, 0, 18)
+Slabel.Text = "Stability: LOADING"
+Slabel.TextXAlignment = Enum.TextXAlignment.Left
+Slabel.TextYAlignment = Enum.TextYAlignment.Bottom
 
 Plabel.Name = "Plabel"
 Plabel.Parent = More
@@ -778,8 +788,22 @@ RS.RenderStepped:Connect(function(d)
 	RSlabel.TextColor3 = getColor(fps)
 	RSlabel.Text = "RenderStepped: "..tostring(fps)
 
+	local mad = 0
+	for _, v in pairs(RSavg) do
+		mad = mad + math.abs(fps - 1 / v)
+	end
+	mad = mad / #RSavg
+	Slabel.Text = "Stability: "..tostring(mad)
+	if mad < 5 then
+		Slabel.TextColor3 = settings.colors.Good
+	elseif mad < 10 then
+		Slabel.TextColor3 = settings.colors.Ok
+	else
+		Slabel.TextColor3 = settings.colors.Bad
+	end
+
 	Background.Size = UDim2.new(0, 235, 0, 28)
-	BackgroundMore.Size = UDim2.new(0, 235, 0, 67)
+	BackgroundMore.Size = UDim2.new(0, 235, 0, 85)
 end)
 
 RS.Heartbeat:Connect(function(d)
