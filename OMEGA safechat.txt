@@ -1,0 +1,21 @@
+function filter(str)
+	local str2 = ""
+	for _, v in pairs(str:split(" ")) do
+		str2 = str2..string.rep("#", v:len()).." "
+	end
+	return str2
+end
+
+local rem = game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.OnMessageDoneFiltering
+local connections = getconnections(rem.OnClientEvent)
+for _, con in pairs(connections) do
+	con:Disable()
+end
+
+rem.OnClientEvent:Connect(function(d, ...)
+	local mod = d
+	mod.Message = filter(d.Message)
+	for _, con in pairs(connections) do
+		con:Fire(mod, ...)
+	end
+end)
