@@ -1,0 +1,293 @@
+-- Game link: https://www.roblox.com/games/10230482079/Plants-vs-Zombies-Defenders
+
+
+-- Created by: McTurtles555 on github
+-- Credits to: Gui to Lua
+
+if game.GameId ~= 3748042489 then
+	error("This game is not Plants VS Zombies Defenders!")
+elseif not workspace.Map.CanPlace:FindFirstChild("Slot") then
+	error("Must be in a match!")
+end
+
+local PVZUI = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local selected = Instance.new("TextLabel")
+local plants = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+
+local plantslist = {
+	"Bloomerang",
+	"BonkChoy",
+	"Buttercup",
+	"Cactus",
+	"Cherry_Bomb",
+	"Chomper",
+	"FumeShroom",
+	"Hypno",
+	"KernelPult",
+	"LightningReed",
+	"LilyPad",
+	"MelonPult",
+	"Nightcap",
+	"Peashooter",
+	"Pot",
+	"PotatoMine",
+	"Pyra-Shroom
+	"ScaredyShroom",
+	"SnowPeashooter",
+	"SunFlower",
+	"SunShroom",
+	"TangleKelp",
+	"TorchWood",
+	"UmbrellaLeaf",
+	"WallNut",
+	"WitherFlower",
+	"ZoyBeanPod"
+}
+
+local sellall = Instance.new("TextButton")
+local sell = Instance.new("TextButton")
+local sellamount = Instance.new("TextBox")
+local spawnamount = Instance.new("TextBox")
+local spawnbutton = Instance.new("TextButton")
+local info = Instance.new("TextLabel")
+local title = Instance.new("TextLabel")
+
+--Properties:
+
+PVZUI.Name = "PVZUI"
+PVZUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+PVZUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+PVZUI.Enabled = true
+
+Frame.Parent = PVZUI
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+Frame.BorderColor3 = Color3.fromRGB(27, 42, 53)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+Frame.AutomaticSize = 2
+Frame.Size = UDim2.new(0, 595, 0, 455)
+
+selected.Name = "selected"
+selected.Parent = Frame
+selected.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+selected.BorderSizePixel = 0
+selected.Position = UDim2.new(0.0504201688, 0, 0.0659340695, 0)
+selected.Size = UDim2.new(0.201680675, 0, 0.0659340695, 0)
+selected.Font = Enum.Font.SourceSansBold
+selected.Text = "Peashooter"
+selected.TextColor3 = Color3.fromRGB(255, 255, 255)
+selected.TextSize = 14.000
+
+plants.Name = "plants"
+plants.Parent = Frame
+plants.Active = true
+plants.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+plants.BorderSizePixel = 0
+plants.Position = UDim2.new(0.0503163561, 0, 0.131706893, 0)
+plants.Size = UDim2.new(0.201680675, 0, 0.802197814, 0)
+plants.CanvasSize = UDim2.new(0, 0, 1.70000005, 0)
+plants.ScrollBarThickness = 7
+
+UIListLayout.Parent = plants
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+for _, plantname in pairs(plantslist) do
+	local new = Instance.new("TextButton")
+	new.Name = plantname
+	new.Parent = plants
+	new.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+	new.BorderSizePixel = 0
+	new.Size = UDim2.new(1, 0, 0, 30)
+	new.Font = Enum.Font.SourceSans
+	new.Text = plantname
+	new.TextColor3 = Color3.fromRGB(255, 255, 255)
+	new.TextSize = 14.000
+end
+
+sellall.Name = "sellall"
+sellall.Parent = Frame
+sellall.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+sellall.BorderSizePixel = 0
+sellall.Position = UDim2.new(0.747899175, 0, 0.065934062, 0)
+sellall.Size = UDim2.new(0.201680675, 0, 0.0659340695, 0)
+sellall.Font = Enum.Font.SourceSans
+sellall.Text = "Sell all plants"
+sellall.TextColor3 = Color3.fromRGB(255, 255, 255)
+sellall.TextSize = 14.000
+
+sell.Name = "sell"
+sell.Parent = Frame
+sell.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+sell.BorderSizePixel = 0
+sell.Position = UDim2.new(0.49579832, 0, 0.065934062, 0)
+sell.Size = UDim2.new(0.201680675, 0, 0.0659340695, 0)
+sell.Font = Enum.Font.SourceSans
+sell.Text = "Sell a plant"
+sell.TextColor3 = Color3.fromRGB(255, 255, 255)
+sell.TextSize = 14.000
+
+sellamount.Name = "sellamount"
+sellamount.Parent = Frame
+sellamount.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+sellamount.BorderSizePixel = 0
+sellamount.Position = UDim2.new(0.30252102, 0, 0.0659340695, 0)
+sellamount.Size = UDim2.new(0.142857149, 0, 0.0637362674, 0)
+sellamount.ClearTextOnFocus = false
+sellamount.Font = Enum.Font.SourceSans
+sellamount.PlaceholderColor3 = Color3.fromRGB(178, 178, 178)
+sellamount.PlaceholderText = "Sell multiplier"
+sellamount.Text = ""
+sellamount.TextColor3 = Color3.fromRGB(255, 255, 255)
+sellamount.TextSize = 14.000
+
+spawnamount.Name = "spawnamount"
+spawnamount.Parent = Frame
+spawnamount.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+spawnamount.BorderSizePixel = 0
+spawnamount.Position = UDim2.new(0.303000003, 0, 0.197802201, 0)
+spawnamount.Size = UDim2.new(0.142857149, 0, 0.0637362674, 0)
+spawnamount.ClearTextOnFocus = false
+spawnamount.Font = Enum.Font.SourceSans
+spawnamount.PlaceholderText = "Amount"
+spawnamount.Text = ""
+spawnamount.TextColor3 = Color3.fromRGB(255, 255, 255)
+spawnamount.TextSize = 14.000
+
+spawnbutton.Name = "spawn"
+spawnbutton.Parent = Frame
+spawnbutton.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+spawnbutton.BorderSizePixel = 0
+spawnbutton.Position = UDim2.new(0.495999992, 0, 0.197802201, 0)
+spawnbutton.Size = UDim2.new(0.201680675, 0, 0.0659340695, 0)
+spawnbutton.Font = Enum.Font.SourceSans
+spawnbutton.Text = "Spawn plant(s)"
+spawnbutton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spawnbutton.TextSize = 14.000
+
+info.Name = "info"
+info.Parent = Frame
+info.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+info.BackgroundTransparency = 1.000
+info.Position = UDim2.new(0.30252102, 0, 0.853815019, 0)
+info.Size = UDim2.new(0.647058845, 0, 0.0769230798, 0)
+info.Font = Enum.Font.SourceSans
+info.Text = "Developed by McTurtles555 on github\nPress G to toggle gui, press and hold H and click to draw with plants"
+info.TextColor3 = Color3.fromRGB(178, 178, 178)
+info.TextSize = 13.000
+info.TextWrapped = true
+info.TextXAlignment = Enum.TextXAlignment.Right
+info.TextYAlignment = Enum.TextYAlignment.Bottom
+
+title.Name = "title"
+title.Parent = Frame
+title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1.000
+title.Position = UDim2.new(0.30252102, 0, 0.35164836, 0)
+title.Size = UDim2.new(0.647058845, 0, 0.294505507, 0)
+title.Font = Enum.Font.SpecialElite
+title.Text = "Plants Vs Zombies\nDefenders GUI"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 40.000
+title.TextWrapped = true
+
+local plr = game.Players.LocalPlayer
+local mouse = plr:GetMouse()
+local selectedv = "Peashooter"
+local click = false
+local down = false
+local remotes = game:GetService("ReplicatedStorage"):WaitForChild(".eventesss.")
+local spawnremote = remotes:WaitForChild("ñ")
+local sellremote = remotes:WaitForChild("seññ")
+
+function getPos()
+	return CFrame.new(plr.Character.HumanoidRootPart.CFrame.Position)
+end
+
+function getMousepos()
+	return CFrame.new(mouse.Hit.Position)
+end
+
+for _, plant in pairs(plants:GetChildren()) do
+	if plant:IsA("TextButton") then
+		plant.MouseButton1Click:Connect(function()
+			selectedv = plant.Name
+			selected.Text = selectedv
+		end)
+	end
+end
+
+spawnamount.FocusLost:Connect(function()
+	local n = tonumber(spawnamount.Text)
+	if n then
+		n = math.clamp(n, 1, 1000000)
+		n = math.floor(n + 0.5)
+		spawnamount.Text = tostring(n)
+	else
+		spawnamount.Text = ""
+	end
+end)
+
+sellamount.FocusLost:Connect(function()
+	local n = tonumber(sellamount.Text)
+	if n then
+		n = math.clamp(n, 1, 1000000)
+		n = math.floor(n + 0.5)
+		sellamount.Text = tostring(n)
+	else
+		sellamount.Text = ""
+	end
+end)
+
+spawnbutton.MouseButton1Click:Connect(function()
+	for _ = 1, tonumber(spawnamount.Text) do
+		spawnremote:FireServer(selectedv, getPos(), workspace.Map.CanPlace.Slot)
+	end
+end)
+
+sell.MouseButton1Click:Connect(function()
+	for _ = 1, tonumber(sellamount.Text) do
+		sellremote:FireServer(workspace.Plants:FindFirstChildOfClass("Model"))
+	end
+end)
+
+sellall.MouseButton1Click:Connect(function()
+	for _, plant in pairs(workspace.Plants:GetChildren()) do
+		sellremote:FireServer(plant)
+	end
+end)
+
+
+mouse.Button1Down:Connect(function()
+	click = true
+end)
+
+mouse.Button1Up:Connect(function()
+	click = false
+end)
+
+mouse.KeyDown:Connect(function(key)
+	if key == "h" then
+		down = true
+	elseif key == "g" then
+		PVZUI.Enabled = not PVZUI.Enabled
+	end	
+end)
+
+mouse.KeyUp:Connect(function(key)
+	if key == "h" then
+		down = false
+	end	
+end)
+
+coroutine.resume(coroutine.create(function()
+	while wait() do
+		if click and down then
+			spawnremote:FireServer(selectedv, getMousepos(), workspace.Map.CanPlace.Slot)
+		end	
+	end
+end))
+
+PVZUI.Enabled = true
