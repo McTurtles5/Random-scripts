@@ -1,7 +1,7 @@
 -- Game link: https://www.roblox.com/games/10230482079/Plants-vs-Zombies-Defenders
 
 
--- Created by: McTurtles555 on github
+-- Created by: McTurtles5 on github
 -- Credits to: Gui to Lua
 
 if game.GameId ~= 3748042489 then
@@ -174,7 +174,7 @@ info.BackgroundTransparency = 1.000
 info.Position = UDim2.new(0.30252102, 0, 0.853815019, 0)
 info.Size = UDim2.new(0.647058845, 0, 0.0769230798, 0)
 info.Font = Enum.Font.SourceSans
-info.Text = "Developed by McTurtles555 on github\nPress G to toggle gui, press and hold H and click to draw with plants"
+info.Text = "Developed by McTurtles5 on github\nPress G to toggle gui, press and hold H and click to draw with plants"
 info.TextColor3 = Color3.fromRGB(178, 178, 178)
 info.TextSize = 13.000
 info.TextWrapped = true
