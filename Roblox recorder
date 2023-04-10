@@ -1,0 +1,244 @@
+local Recorded = {}
+local Characters = ("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"):split("")
+
+function generateId()
+	local str = ""
+	for i = 1, 15 do
+		str = str..Characters[math.random(1, #Characters)]
+	end
+	return str
+end
+
+Render = {}
+Render.Binds = {}
+
+function Render.Bind(name, func, con)
+	con = con or game:GetService("RunService").RenderStepped
+	table.insert(Render.Binds, {["Name"] = name, ["Connection"] = con:Connect(func)})
+end
+
+function Render.Unbind(name)
+	for i, connection in pairs(Render.Binds) do
+		if connection.Name == name then
+			connection.Connection:Disconnect()
+			table.remove(Render.Binds, i)
+		end
+	end
+end
+
+-- This unbinds and rebinds the function(s) that have the name (<string>name)
+
+function Render.Rebind(name, func, con)
+	Render.Unbind(name)
+	Render.Bind(name, func, con)
+end
+
+-- This finds functions connected to the name and returns how many (<string>name) RETURN: (<bool>isconnected, <int>amount)
+function Render.isRender(name)
+	local counted = 0
+	for i, connection in pairs(Render.Binds) do
+		if connection.Name == name then
+			counted = counted + 1
+		end
+	end
+	return counted > 0, counted
+end
+
+
+local stringify
+
+stringify = function(v, spaces, usesemicolon, depth)
+	if type(v) ~= 'table' then
+		return tostring(v)
+	elseif not next(v) then
+		return '{}'
+	end
+
+	spaces = spaces or 4
+	depth = depth or 1
+
+	local space = (" "):rep(depth * spaces)
+	local sep = usesemicolon and ";" or ","
+	local s = "{"
+
+	for k, x in next, v do
+		s = s..("\n%s[%s] = %s%s"):format(space,type(k)=='number'and tostring(k)or('"%s"'):format(tostring(k)), stringify(x, spaces, usesemicolon, depth+1), sep)
+	end
+
+	return ("%s\n%s}"):format(s:sub(1,-2), space:sub(1, -spaces-1))
+end
+
+function insertFrame(time, data)
+	local frame = Recorded[time] or {}
+	table.insert(frame, data)
+	Recorded[time] = frame
+end
+
+local Parts = {}
+
+function interpret(data)
+	local part = nil
+	if data.Instruction == "CREATE" then
+		part = Instance.new("Part", workspace)
+		part.Anchored = true
+		part.Name = "REPLAY RENDER PART"
+		Parts[data.Id] = part
+	elseif data.Instruction == "CHANGE" then
+		part = Parts[data.Id]
+	end
+	for prop, value in pairs(data.Properties) do
+		part[prop] = value
+	end
+end
+
+function lastIndex(table)
+	local index = 0
+	for i in pairs(table) do
+		if i > index then 
+			index = i
+		end
+	end
+	return index
+end
+
+function inRange(x, min, max)
+   return x > min and x < max
+end
+
+function playBack(Recording)
+	local start = os.clock()
+	local last = -1
+	local final = lastIndex(Recording)
+	Render.Rebind("PLAYBACK", function()
+		local clk = os.clock()
+		local runtime = clk - start
+		if clk > final + start then
+			Render.Unbind("PLAYBACK")
+		end
+		for time, frame in pairs(Recording) do
+			if inRange(time, last, runtime) then
+				for _, data in pairs(frame) do
+					interpret(data)
+				end
+			end
+		end
+		print()
+		last = runtime
+	end)
+end
+
+--[[local temp1 = generateId()
+local temp2 = generateId()
+local temp3 = generateId()
+
+insertFrame(0, {
+	["Instruction"] = "CREATE",
+	["Id"] = temp1,
+	["Properties"] = {
+		["CFrame"] = CFrame.new(4, 7, 27),
+		["Size"] = Vector3.new(2, 2, 2)
+	}
+})
+insertFrame(0.5, {
+	["Instruction"] = "CHANGE",
+	["Id"] = temp1,
+	["Properties"] = {
+		["CFrame"] = CFrame.new(4, 7, 37),
+		["Size"] = Vector3.new(5, 5, 5)
+	}
+})
+
+insertFrame(1, {
+	["Instruction"] = "CREATE",
+	["Id"] = temp2,
+	["Properties"] = {
+		["CFrame"] = CFrame.new(4, 15, 27),
+		["Size"] = Vector3.new(2, 2, 2)
+	}
+})
+insertFrame(2, {
+	["Instruction"] = "CHANGE",
+	["Id"] = temp2,
+	["Properties"] = {
+		["CFrame"] = CFrame.new(4, 15, 37),
+		["Size"] = Vector3.new(5, 5, 5)
+	}
+})
+
+insertFrame(2, {
+	["Instruction"] = "CREATE",
+	["Id"] = temp3,
+	["Properties"] = {
+		["CFrame"] = CFrame.new(-2, 7, 27),
+		["Size"] = Vector3.new(2, 2, 2)
+	}
+})
+insertFrame(3, {
+	["Instruction"] = "CHANGE",
+	["Id"] = temp3,
+	["Properties"] = {
+		["CFrame"] = CFrame.new(-2, 7, 37),
+		["Size"] = Vector3.new(5, 5, 5)
+	}
+})
+insertFrame(3.1, {
+	["Instruction"] = "CHANGE",
+	["Id"] = temp3,
+	["Properties"] = {
+		["Color"] = Color3.new(1, 0, 0)
+	}
+})]]
+
+local mouse = game.Players.LocalPlayer:GetMouse()
+local clicked = {}
+local bind1 = mouse.Button1Down:Connect(function()
+	clicked[mouse.Target] = generateId()
+end)
+local bind2 
+bind2 = mouse.KeyDown:Connect(function(key)
+	if key == "m" then
+		bind2:Disconnect()
+		Render.Unbind("CAPTURE")
+		task.wait(1)
+		playBack(Recorded)
+	end
+end)
+
+--mouse.KeyDown:Wait()
+
+bind1:Disconnect()
+
+for _, v in pairs(workspace:GetDescendants()) do
+	if v:IsA("Part") then
+		
+	end
+end
+
+for v, id in pairs(clicked) do
+	insertFrame(0, {
+		["Instruction"] = "CREATE",
+		["Id"] = id,
+		["Properties"] = {
+			["Position"] = v.Position + Vector3,
+			["Orientation"] = v.Orientation,
+			["Size"] = v.Size
+		}
+	})
+end
+
+local start = os.clock()
+Render.Bind("CAPTURE", function()
+	local clk = os.clock()
+	for v, id in pairs(clicked) do
+		insertFrame(clk - start, {
+			["Instruction"] = "CHANGE",
+			["Id"] = id,
+			["Properties"] = {
+				["CFrame"] = v.CFrame,
+				["Size"] = v.Size
+			}
+		})
+	end
+end)
+
+print(stringify(Recorded))
