@@ -788,15 +788,15 @@ RS.RenderStepped:Connect(function(d)
 	RSlabel.TextColor3 = getColor(fps)
 	RSlabel.Text = "RenderStepped: "..tostring(fps)
 
-	local mad = 0
+	local madfps = 0
 	for _, v in pairs(RSavg) do
-		mad = mad + math.abs(fps - 1 / v)
+		madfps = madfps + math.abs(fps - 1 / v)
 	end
-	mad = mad / #RSavg
-	Slabel.Text = "Stability: "..tostring(mad)
-	if mad < 5 then
+	madfps = madfps / #RSavg
+	Slabel.Text = "Stability: "..tostring(madfps)
+	if madfps < 5 then
 		Slabel.TextColor3 = settings.colors.Good
-	elseif mad < 10 then
+	elseif madfps < 10 then
 		Slabel.TextColor3 = settings.colors.Ok
 	else
 		Slabel.TextColor3 = settings.colors.Bad
