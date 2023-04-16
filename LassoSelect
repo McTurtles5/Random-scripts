@@ -116,12 +116,12 @@ function Select(isSelectable)
 	end)
 	Binds[#Binds+1] = UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			local Target = Mouse.target
+			local Target = Mouse.Target
 			if crtlHeld() then
 				local Found = table.find(Selected, Target)
 				if Found then
 					table.remove(Selected, Found)
-				elseif isSelectable(Found) then
+				elseif not Found and isSelectable(Target) then
 					table.insert(Selected, Target)
 				end
 			else
