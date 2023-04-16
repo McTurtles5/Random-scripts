@@ -1,6 +1,6 @@
 -- LASSO MODULE
 
--- local Lasso = loadstring("https://github.com/McTurtles5/Random-scripts/raw/main/LassoSelect")()
+-- local Lasso = loadstring(game:HttpGet("https://github.com/McTurtles5/Random-scripts/raw/main/LassoSelect"))()
 
 --       Lasso.Select(function: isSelectable?): {[number]: Instance} (YEILDS)
 --       Gives a UI for selecting multiple parts and returns once Enter is pressed. This function will yeild
