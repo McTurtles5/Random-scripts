@@ -133,7 +133,7 @@ function Select(isSelectable)
 				local Min = Vector2.new(math.min(StartPos.X, EndPos.X), math.min(StartPos.Y, EndPos.Y))
 
 				for _, Part in pairs(workspace:GetDescendants()) do
-					if Part:IsA("BasePart") and not Part.Locked then
+					if Part:IsA("BasePart") and isSelectable(Part) then
 						local Position, Visible = workspace.CurrentCamera:WorldToViewportPoint(Part.Position)
 						Position -= Vector3.new(Inset.X, Inset.Y, 0)
 						if Visible and Min.X < Position.X and Max.X > Position.X and Min.Y < Position.Y and Max.Y > Position.Y then
