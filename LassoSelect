@@ -82,7 +82,14 @@ function Select(isSelectable)
 			for _, Bind in pairs(Binds) do
 				Bind:Disconnect()
 			end
-			Submit:Fire(Selected)
+
+			local Final = {}
+			for i, Part in pairs(Selected) do
+				if isSelectable(Part) then
+					table.insert(Final, Part)
+				end
+			end
+			Submit:Fire(Final)
 		end
 	end)
 	Binds[#Binds+1] = UserInputService.InputChanged:Connect(function(input)
