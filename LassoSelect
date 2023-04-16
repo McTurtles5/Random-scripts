@@ -1,0 +1,162 @@
+-- 
+
+local Players = game:GetService("Players")
+local GuiService = game:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+local Characters = ("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()*+./:;<=>?@[]^_`{|}~"):split("")
+
+function randomString()
+	local str = ""
+	for i = 1, math.random(5, 20) do
+		str = str..Characters[math.random(1, #Characters)]
+	end
+	return str
+end
+
+function crtlHeld()
+	return UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl)
+end
+
+function createSelection(Folder, Part, White)
+	local SelectionBox = Instance.new("SelectionBox", Folder)
+	SelectionBox.Color3 = White and Color3.new(1, 1, 1) or Color3.new(0, 0.7, 1)
+	SelectionBox.LineThickness = 0.03
+	SelectionBox.Transparency = 0.5
+	SelectionBox.Adornee = Part
+	return SelectionBox
+end
+
+function Select(isSelectable)
+	local UI = Instance.new("ScreenGui", game:GetService("CoreGui"))
+	local SelectionFrame = Instance.new("Frame", UI)
+	local Label = Instance.new("TextLabel", UI)
+	local Selections = Instance.new("Folder", UI)
+
+	isSelectable = isSelectable or function(Part)
+		return not Part.Locked
+	end
+
+	UI.Name = randomString()
+
+	SelectionFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	SelectionFrame.BackgroundTransparency = 0.5
+	SelectionFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	SelectionFrame.Visible = false
+
+	Label.AnchorPoint = Vector2.new(0, 1)
+	Label.BackgroundTransparency = 1
+	Label.Position = UDim2.new(0, 0, 0.85, 0)
+	Label.Size = UDim2.new(1, 0, 0.05, 0)
+	Label.Text = "<stroke color='#000000' joins='miter' thickness='1' transparency='0'>Hold <b>CTRL</b> to multi-select. Press <b>ENTER</b> to submit</stroke>"
+	Label.TextColor3 = Color3.new(1, 1, 1)
+	Label.TextScaled = true
+	Label.RichText = true
+
+	local StartPos, EndPos = Vector2.zero, Vector2.zero
+	local Lassoing, Clicking = false, false
+	local Selected, Binds = {}, {}
+
+	local Submit = Instance.new("BindableEvent")
+	local Mouse = Players.LocalPlayer:GetMouse()
+	local Hover = nil
+
+	local function renderSelections()
+		Selections:ClearAllChildren()
+		for _, Part in pairs(Selected) do
+			createSelection(Selections, Part)
+		end
+	end
+
+	Binds[#Binds+1] = UserInputService.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			Clicking = true
+			StartPos = Vector2.new(input.Position.X, input.Position.Y)
+		elseif input.KeyCode == Enum.KeyCode.Return then
+			UI:Destroy()
+			for _, Bind in pairs(Binds) do
+				Bind:Disconnect()
+			end
+			Submit:Fire(Selected)
+		end
+	end)
+	Binds[#Binds+1] = UserInputService.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			EndPos = Vector2.new(input.Position.X, input.Position.Y)
+
+			local Direction = EndPos - StartPos
+			if Direction.Magnitude > 10 and Clicking then
+				Lassoing = true
+			end
+			if Lassoing then
+				SelectionFrame.Position = UDim2.new(0, StartPos.X, 0, StartPos.Y)
+				SelectionFrame.Size = UDim2.new(0, Direction.X, 0, Direction.Y)
+				SelectionFrame.Visible = true
+			end
+			if Hover then
+				Hover:Destroy()
+			end
+			local Target = Mouse.Target
+			if Target and isSelectable(Target) then
+				Hover = createSelection(Selections, Target, true)
+			end
+		end
+	end)
+	Binds[#Binds+1] = UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local Target = Mouse.Target
+			if crtlHeld() then
+				local Found = table.find(Selected, Target)
+				if Found then
+					table.remove(Selected, Found)
+				else
+					table.insert(Selected, Target)
+				end
+			else
+				if Target and isSelectable(Target) then
+					Selected = {Target}
+				else
+					Selected = {}
+				end
+			end
+
+			if Lassoing then
+				local Found = {}
+				local Inset = GuiService:GetGuiInset()
+
+				local Max = Vector2.new(math.max(StartPos.X, EndPos.X), math.max(StartPos.Y, EndPos.Y))
+				local Min = Vector2.new(math.min(StartPos.X, EndPos.X), math.min(StartPos.Y, EndPos.Y))
+
+				for _, Part in pairs(workspace:GetDescendants()) do
+					if Part:IsA("BasePart") and not Part.Locked then
+						local Position, Visible = workspace.CurrentCamera:WorldToViewportPoint(Part.Position)
+						Position -= Vector3.new(Inset.X, Inset.Y, 0)
+						if Visible and Min.X < Position.X and Max.X > Position.X and Min.Y < Position.Y and Max.Y > Position.Y then
+							table.insert(Found, Part)
+						end
+					end
+				end
+
+				if crtlHeld() then
+					for _, Part in pairs(Found) do
+						if not table.find(Selected, Part) then
+							table.insert(Selected, Part)
+						end
+					end
+				else
+					Selected = Found
+				end
+			end
+
+			renderSelections()
+			SelectionFrame.Visible = false
+			Clicking = false
+			Lassoing = false
+		end
+	end)
+
+	return Submit.Event:Wait()
+end
+
+return {
+	Select = Select
+}
