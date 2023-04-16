@@ -121,7 +121,7 @@ function Select(isSelectable)
 				local Found = table.find(Selected, Target)
 				if Found then
 					table.remove(Selected, Found)
-				elseif isSelectable(Found)
+				elseif isSelectable(Found) then
 					table.insert(Selected, Target)
 				end
 			else
