@@ -1,4 +1,10 @@
--- 
+-- LASSO MODULE
+
+-- local Lasso = loadstring("https://github.com/McTurtles5/Random-scripts/raw/main/LassoSelect")()
+
+--       Lasso.Select(function: isSelectable?): {[number]: Instance} (YEILDS)
+--       Gives a UI for selecting multiple parts and returns once Enter is pressed. This function will yeild
+--       "isSelectable" will pass the current part and decides if that part is select by returning true
 
 local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
