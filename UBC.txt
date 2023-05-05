@@ -1,0 +1,1318 @@
+if game.PlaceId ~= 6982988368 then
+	return {
+		["PluginName"] = "Ultimate commands",
+		["PluginDescription"] = "Please join ultimate build to use this! (DO NOT SHARE)",
+		["Commands"] = {}
+	}
+end
+
+if not game.IsLoaded then
+	game.Loaded:Wait()
+end
+
+local function ge() return getgenv() end
+
+ge().UBCdata = ge().UBCdata or {}
+ge().UBCdata.RenderConnections = ge().UBCdata.RenderConnections or {}
+
+local plr = Players.LocalPlayer
+
+local Lasso = loadstring(game:HttpGet("https://github.com/McTurtles5/Random-scripts/raw/main/LassoSelect"))()
+local RST = game:GetService("ReplicatedStorage")
+local RS = game:GetService("RunService")
+local ClientBridge = RST:WaitForChild("ClientBridge")
+local ClassicController = ClientBridge.ClassicController
+local DragControlIer = ClientBridge.DragControlIer
+local RequestDeleteBlock = ClientBridge.RequestDeleteBlock
+local GuiCommand = ClientBridge.GuiCommand
+local GuiFunctions = ClientBridge.GuiFunctions --GuiFunctions:FireServer("Gear", "SuperFlyGoldBoombox")
+local MouseCursor = ClientBridge.MouseCursor
+local RequestPropertyChange = ClientBridge.RequestPropertyChange
+local SayMessageRequest = RST:WaitForChild("DefaultChatSystemChatEvents").SayMessageRequest
+local Characters = ("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()*+./:;<=>?@[]^_`{|}~"):split("")
+
+-- ADMIN REMOTES, CHECK FOR ADMIN WITH FIRST REMOTE BEFORE PROCEEDING
+
+local AdminChecker = ClientBridge.AdminChecker
+local GameBanUpdateRequest = ClientBridge.GameBanUpdateRequest
+local QueryGameBannedPlayer = ClientBridge.QueryGameBannedPlayer
+
+--[[local args = {
+    [1] = "NS_Utara",
+    [2] = {
+        [1] = 1683238552, 0 is unbanned, 1 is permenant ban, do os.time() + ban seconds for ban time
+        [2] = "griefing and trampolining"
+    }
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("ClientBridge"):WaitForChild("GameBanUpdateRequest"):InvokeServer(unpack(args))]]
+
+
+function randomString()
+	local str = ""
+	for i = 1, math.random(5, 20) do
+		str = str..Characters[math.random(1, #Characters)]
+	end
+	return str
+end
+
+function partFromCharacteristics(par, size, color, material)
+	for _, v in pairs(workspace.Map["Vip Bricks"]:GetDescendants()) do
+		if v:IsA("BasePart") and v.Parent.Name == par and v.Size == size and v.Color == color and v.Material == material then
+			return v
+		end
+	end
+end
+
+local function Respawn(spawnpos)
+	local camtrackback = 4
+	local char = plr.Character
+	local pos = nil
+	local vel = nil
+	local camframe = nil
+	local root = getRoot(char) or char:FindFirstChildOfClass("BasePart")
+	local trackcam = true
+	local track = nil
+	local camtracks = {}
+	local currentsub = workspace.CurrentCamera.CameraSubject
+	local last = nil
+	if workspace.CurrentCamera then
+		camframe = workspace.CurrentCamera.CFrame
+	end
+	pcall(function()
+		pos = spawnpos or root.CFrame
+		function update()
+			if not root or not root.Parent or root == nil or root.Parent == nil then
+				track:Disconnect()
+				return
+			end
+			if not spawnpos then
+				pos = root.CFrame
+			end
+			last = workspace.CurrentCamera.CFrame
+			camframe = workspace.CurrentCamera.CFrame
+			if trackcam and workspace.CurrentCamera and workspace.CurrentCamera.CameraSubject == currentsub and currentsub then
+				table.insert(camtracks, workspace.CurrentCamera.CFrame)
+			end
+			vel = root.Velocity
+		end
+		track = RS.RenderStepped:Connect(update)
+		update()
+	end)
+	GuiFunctions:FireServer("LoadCharacter")
+	plr.CharacterAdded:Wait()
+	trackcam = false
+	while not plr.Character do
+		RS.RenderStepped:Wait()
+	end
+	if track then
+		track:Disconnect()
+	end
+	char = plr.Character
+	if not char.PrimaryPart then
+		char:GetPropertyChangedSignal("PrimaryPart"):Wait()
+	end
+	root = getRoot(char) or char:FindFirstChildWhichIsA("BasePart")
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	camframe = camtracks[math.max(1, #camtracks - camtrackback)]
+	print(pcall(function()
+		if pos then
+			local cs = 0
+			repeat
+				local root = getRoot(char) or char:FindFirstChildWhichIsA("BasePart")
+				root.CFrame = pos
+				if workspace.CurrentCamera and camframe then
+					workspace.CurrentCamera.CFrame = camframe
+				end
+				RS.RenderStepped:Wait()
+				root.Velocity = Vector3.new(0, 0, 0)
+				if (root.CFrame.Position - pos.Position).magnitude < 5 then
+					cs = cs + 1
+				end
+			until cs >= 10
+		end
+		if hum then
+			hum:ChangeState(2)
+		end
+	end))
+	pcall(function()
+		if vel then
+			root.Velocity = vel
+		end
+	end)
+	if workspace.CurrentCamera and camframe then
+		workspace.CurrentCamera.CFrame = camframe
+	end
+end
+
+local autore = false
+Players.LocalPlayer.CharacterAdded:Connect(function(char)
+	local hum = char:WaitForChild("Humanoid")
+	hum.Died:Connect(function()
+		if autore then
+			Respawn()
+		end
+	end)
+end)
+
+local Hooked = false
+local MouseCursorEnabled = true
+
+
+-- METATABLE HOOK
+
+function Hook()
+	if Hooked then
+		return
+	end
+	local gt = getrawmetatable(game)
+	local last = gt.__namecall
+	setreadonly(gt, false)
+	gt.__namecall = newcclosure(function(self, ...)
+		local check = getnamecallmethod()
+		local s = getcallingscript()
+		if check == "FireServer" then
+			if self.Name == "MouseCursor" and not MouseCursorEnabled then
+				local args = {...}
+				args[1] = Vector3.new(1, 1, 1)
+				return last(self, unpack(args))
+			end
+		end
+		return last(self, ...)
+	end)
+	setreadonly(gt, true)
+end
+
+--[[
+local args = {...}
+return last(self, unpack(args))
+]]
+
+local serverSeeds = {}
+local clientSeeds = {}
+
+function refreshSeeds()
+	table.clear(serverSeeds)
+	table.clear(clientSeeds)
+	for _, func in pairs(getgc()) do
+		if type(func) == "function" and islclosure(func) then
+			local source = getfenv(func).script
+			local constants = getconstants(func)
+			local nextInt = table.find(constants, "NextInteger")
+			local seed = nextInt and constants[nextInt - 1]
+			if seed and typeof(seed) == "number" then
+				clientSeeds[source.Name] = seed
+			elseif source and source:IsDescendantOf(game) then
+				for _, upvalue in pairs(getupvalues(func)) do
+					if typeof(upvalue) == "Random" then
+						serverSeeds[source.Name] = upvalue
+						break
+					end
+				end
+			end
+		end
+	end
+end
+
+function getSeed(property)
+	return serverSeeds[property]:NextInteger(0, clientSeeds[property])
+end
+
+function equipTool(name)
+	local tool = plr.Backpack:FindFirstChild(name)
+
+	if tool then
+		tool.Parent = plr.Character
+	end
+end
+
+function Resize(part, size, cframe, welds)
+	equipTool("Brush")
+	ClientBridge.Resize:FireServer(part, size, cframe, welds or {}, getSeed("Resize"))
+end
+
+--[[
+WELDS TABLE
+
+[1] = {
+	["ClassName"] = "Weld",
+	["Part1"] = workspace:WaitForChild("Part"),
+	["Part0"] = workspace:WaitForChild("Part"),
+	["C0"] = CFrame.new(0, -2, 0, 1, 0, 0, -0, -0, -1, 0, 1, 0),
+	["C1"] = CFrame.new(0, 2, -0.5, 1, 0, 0, 0, 0, -1, 0, 1, 0)
+}
+]]
+
+function Brush(action, data, part)
+	local id = math.random(0, 99999999)
+	ClassicController:FireServer("Lasso", Vector3.zero)
+	ClassicController:FireServer(action.."Start", id, {[action] = data})
+	ClassicController:FireServer(action, id, {["Part"] = part})
+	ClassicController:FireServer(action.."Stop", id, {})
+	ClassicController:FireServer("Lasso")
+end
+
+function Delete(part)
+	equipTool("Delete")
+	local attempts = 0
+	while part and part.Parent and attempts < 20 do
+		RequestDeleteBlock:InvokeServer(part, getSeed("Delete"))
+		attempts += 1
+	end
+end
+
+partsList = {
+	["Part"] = partFromCharacteristics("Unanchored Bricks", Vector3.new(3, 1, 6), Color3.fromRGB(27, 42, 53), Enum.Material.Plastic),
+	["Big part"] = partFromCharacteristics("Parts", Vector3.new(8, 4, 4), Color3.fromRGB(99, 95, 98), Enum.Material.Plastic),
+	["Cylinder"] = partFromCharacteristics("Parts", Vector3.new(4, 4, 4), Color3.fromRGB(27, 42, 53), Enum.Material.Plastic),
+	["Frictionless"] = partFromCharacteristics("Parts", Vector3.new(2, 1, 8), Color3.fromRGB(163, 162, 165), Enum.Material.Plastic),
+	["Wood"] = partFromCharacteristics("Parts", Vector3.new(2, 1, 8), Color3.fromRGB(105, 64, 40), Enum.Material.Wood),
+	["Super stable"] = workspace.Map["Vip Bricks"]["Hover Bricks"]["Hover Bricks"].VipStableHover.Stable,
+	["Stable"] = workspace.Map["Vip Bricks"]["Hover Bricks"]["Hover Bricks"].VipHover.Stable,
+	["Server part"] = workspace.Map["Vip Bricks"].Modifiers["Server Part"].NetworkPart,
+}
+
+function getPart(name)
+	if partsList[name] then
+		return partsList[name]
+	end
+	for _, v in pairs(workspace.Map["Vip Bricks"]:GetDescendants()) do
+		if v:IsA("BasePart") and v.Name == name then
+			return v
+		end
+	end
+end
+
+function clonePart(part, pos)
+	equipTool("Clone")
+	local attempts = 0
+
+	local suc, key, partc = nil, nil, nil
+
+	repeat
+		if attempts < 10 then
+			suc, key, partc = DragControlIer:InvokeServer("GetKey", part, true)
+		else
+			error("Could not create part!")
+		end
+		attempts = attempts + 1
+	until suc
+
+	DragControlIer.Update:FireServer("Update", key, pos)
+	DragControlIer.Update:FireServer("ClearKey", key)
+
+	return partc
+end
+
+function loadPart(name, size, color, material)
+	if partsList[name] then
+		return partsList[name]
+	end
+	for _, v in pairs(workspace.Map["Vip Bricks"]:GetDescendants()) do
+		if v:IsA("BasePart") and v.Name == name then
+			return v
+		end
+	end
+end
+
+local m = game.Players.LocalPlayer:GetMouse()
+
+local color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.new(1, 1, 0)),
+	ColorSequenceKeypoint.new(1, Color3.new(1, 1, 0))
+}
+
+function isWired(output_, input_)
+	for _, v in pairs(output_.Parent:GetChildren()) do
+		if v.Name == "Beam" then
+			if v.Attachment1 == input_ then
+				return true
+			end
+		end
+	end
+end
+
+function wire(output_, input_)
+	local attempts = 0
+	while not isWired(output_, input_) and attempts < 40 do
+		game:GetService("ReplicatedStorage").ClientBridge.Wire:InvokeServer("Add", output_, input_, color)
+		attempts += 1
+	end
+end
+
+function getCon(gate)
+	local t = {
+		[0] = {},
+		[1] = {}
+	}
+	for _, v in pairs(gate:GetChildren()) do
+		if v.Name == "Input" then
+			table.insert(t[1], v)
+		elseif v.Name == "Output" then
+			table.insert(t[0], v)
+		end
+	end
+	return t
+end
+
+function toPercent(x)
+	return (math.floor(x * 1000) / 10).."%"
+end
+
+function BindRender(name, func, con)
+	con = con or RS.RenderStepped
+	table.insert(ge().UBCdata.RenderConnections, {["Name"] = name, ["Connection"] = con:Connect(func)})
+end
+
+function UnbindRender(name)
+	for i, connection in pairs(ge().UBCdata.RenderConnections) do
+		if connection.Name == name then
+			connection.Connection:Disconnect()
+			table.remove(ge().UBCdata.RenderConnections, i)
+		end
+	end
+end
+
+function RebindRender(name, func, con)
+	UnbindRender(name)
+	BindRender(name, func, con)
+end
+
+function IsRender(name)
+	local counted = 0
+	for i, connection in pairs(ge().UBCdata.RenderConnections) do
+		if connection.Name == name then
+			counted = counted + 1
+		end
+	end
+	return counted > 0, counted
+end
+
+function stringToValue(str)
+	local lower = str:lower()
+	if table.find({"true", "on"}, lower) then
+		return true
+	elseif table.find({"false", "off"}, lower) then
+		return false
+	end
+	return str
+end
+
+function tableSearch(tabl, str)
+	for _, v in pairs(tabl) do
+		if str:lower() == v:lower():sub(1, str:len()) then
+			return v
+		end
+	end
+end
+
+function chatMessage(msg)
+	SayMessageRequest:FireServer(msg, "All")
+end
+
+function stringToSeconds(str)
+	local unit = str:sub(-1):lower()
+	local time = str:sub(1, -2):lower()
+	if not unit then
+		return str
+	elseif str == "perm" then
+		return math.huge
+	elseif unit == "h" then
+		return time * 3600
+	elseif unit == "d" then
+		return time * 86400
+	elseif unit == "w" then
+		return time * 604800
+	elseif unit == "m" then
+		return time * 2628000
+	elseif unit == "y" then
+		return time * 3154000
+	elseif unit == "c" then
+		return time * 315400000
+	end
+end
+
+F3X = {}
+
+function F3X.Equip()
+	return Players.LocalPlayer.Character:FindFirstChild("F3X") or (function()
+		local Tool = Players.LocalPlayer.Backpack:FindFirstChild("F3X")
+		if not Tool then
+			notify("Error", "F3X is required to use this command.")
+			task.wait(9e9)
+		end
+		Tool.Parent = Players.LocalPlayer.Character
+		task.wait()
+		return Tool
+	end)()
+end
+
+function F3X.SetName(parts, name)
+	local Tool = F3X.Equip()
+	return Tool.SyncAPI.ServerEndpoint:InvokeServer("SetName", parts, name)
+end
+
+function F3X.Lock(parts, locked)
+	local Tool = F3X.Equip()
+	return Tool.SyncAPI.ServerEndpoint:InvokeServer("SetLocked", parts, locked)
+end	
+
+function F3X.Anchor(parts)
+	local Tool = F3X.Equip()
+	return Tool.SyncAPI.ServerEndpoint:InvokeServer("SyncAnchor", parts)
+end
+
+function F3X.CanCollide(parts)
+	local Tool = F3X.Equip()
+	return Tool.SyncAPI.ServerEndpoint:InvokeServer("SyncCollision", parts)
+end
+
+function F3X.Create(Position, Type)
+	local Tool = F3X.Equip()
+	return Tool.SyncAPI.ServerEndpoint:InvokeServer("CreatePart", "Normal", Position or CFrame.new(0, 0, 0), workspace)
+end	
+
+function F3X.Move(parts)
+	local Tool = F3X.Equip()
+	Tool.SyncAPI.ServerEndpoint:InvokeServer("SyncMove", parts)
+end
+
+function F3X.Resize(parts)
+	local Tool = F3X.Equip()
+	Tool.SyncAPI.ServerEndpoint:InvokeServer("SyncResize", parts)
+end	
+
+function F3X.Clone(parts)
+	local Tool = F3X.Equip()
+	return Tool.SyncAPI.ServerEndpoint:InvokeServer("Clone", parts, workspace)
+end	
+
+function F3X.Delete(Parts)
+	if type(Parts) ~= "table" then
+		Parts = {Parts}
+	end
+	if #Parts < 1 then
+		return
+	end
+	local Tool = F3X.Equip()
+	Tool.SyncAPI.ServerEndpoint:InvokeServer("Remove", Parts)
+end
+
+Wrench = {}
+
+Wrench.Values = {
+	"Anchored",
+	"CanTouch",
+	"CastShadow",
+	"Density",
+	"Elasticity",
+	"ElasticityWeight",
+	"Friction",
+	"FrictionWeight",
+	"Transparency",
+	"CanCollide",
+	"Click",
+	"Locked",
+	"Massless",
+	"Reflectance",
+}
+
+--[[Wrench.VipValues = {
+	"CanCollide",
+	"Click",
+	"Locked",
+	"Massless",
+	"Reflectance"
+}]]
+
+function Wrench.Equip()
+	return Players.LocalPlayer.Character:FindFirstChild("Properties") or (function()
+		local Tool = Players.LocalPlayer.Backpack:FindFirstChild("Properties")
+		Tool.Parent = Players.LocalPlayer.Character
+		task.wait()
+		return Tool
+	end)()
+end
+
+function Wrench.EquipVIP()
+	return Players.LocalPlayer.Character:FindFirstChild("VIP") or (function()
+		local Tool = Players.LocalPlayer.Backpack:FindFirstChild("VIP")
+		Attempts = 0
+		while Attempts < 30 and not Tool do
+			GuiFunctions:FireServer("VIP")
+			task.wait(0.2)
+			Tool = Players.LocalPlayer.Backpack:FindFirstChild("VIP")
+			Attempts += 1
+		end
+		Tool.Parent = Players.LocalPlayer.Character
+		task.wait()
+		return Tool
+	end)()
+end
+
+function Wrench.getValue(Part, Property, Value)
+	if not Part then
+		return
+	end
+	local Found = nil
+	local Attributes = Part:GetAttributes()
+	if table.find(Wrench.Values, Property) then
+		Found = Part[Property]
+	elseif Attributes[Property] ~= nil then
+		Found = tableSearch(Attributes, Property)
+		if Found == "ID" then
+			return nil, false
+		end
+		Found = Attributes[Found]
+	else
+		return nil, false
+	end
+	return Found, true
+end
+
+function Wrench.Edit(Part, Property, Value)
+	local Found, Exists = Wrench.getValue(Part, Property, Value)
+	if not Exists then
+		return
+	end
+	local Attempts = 0
+	while Attempts < 20 and Found ~= Value do
+		Wrench.Equip()
+		RequestPropertyChange:InvokeServer(Part, Property, Value)
+		Found = Wrench.getValue(Part, Property, Value)
+		Attempts += 1
+	end
+end
+
+Admin = {}
+
+function Admin.Check()
+	if AdminChecker:InvokeServer() then
+		return true
+	else
+		notify("Invalid permissions", "Admin is required to run this command")
+	end
+end
+
+function Admin.Ban(speaker, name, time, reason)
+	if not Admin.Check() then return end
+	time = (time and time:lower()) or "perm"
+	name = getPlayer(name, speaker)[1] or name
+	local length = stringToSeconds(time)
+	local unban = os.time() + length
+	if time == "perm" then
+		unban = 1
+	end
+	if not reason or reason == "" then
+		reason = "[No reason specified]"
+	end
+	GameBanUpdateRequest:InvokeServer(name, {unban, reason})
+end
+
+local crashcode = nil
+local runningJobs = {}
+
+UBC = {
+	["PluginName"] = "Ultimate commands",
+	["PluginDescription"] = "Commands for Ultimate build! (DO NOT SHARE)",
+	["Commands"] = {
+		["spawnpart"] = {
+			["ListName"] = "spawnpart / summonpart / sp [name]",
+			["Description"] = "Spawns in a part",
+			["Aliases"] = {"summonpart", "sp"},
+			["Function"] = function(args, speaker)
+				local part = getPart(table.concat(args, " "))
+
+				if part then
+					clonePart(part, plr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5))
+				else
+					notify("Error", "No such part (case sensetive)")
+				end
+			end,
+		},
+		["spawnXORbomb"] = {
+			["ListName"] = "spawnXORbomb / summonXORbomb / bomb",
+			["Description"] = "Spawns in a XOR bomb",
+			["Aliases"] = {"summonXORbomb", "bomb"},
+			["Function"] = function(args, speaker)
+				local pos = plr.Character.HumanoidRootPart.CFrame
+				local XNOR = getCon(clonePart(getPart("Xnor"), pos * CFrame.new(2, 0, -5)))
+				local AND = getCon(clonePart(getPart("And"), pos * CFrame.new(-2, 0, -5)))
+				local BUTTON = getCon(clonePart(getPart("Button"), pos * CFrame.new(0, 0, -5)))
+				wire(BUTTON[0][1], AND[1][1])
+				wire(XNOR[0][1], AND[1][2])
+				wire(AND[0][1], XNOR[1][1])
+			end,
+		},
+		["explode"] = {
+			["ListName"] = "explode / boom [plr]",
+			["Description"] = "Makes somebody explode with XOR bomb",
+			["Aliases"] = {"boom"},
+			["Function"] = function(args, speaker)
+				local target = getPlayer(args[1], speaker)[1]
+				if target then
+					local XNOR = getCon(clonePart(getPart("Xnor"), CFrame.new(math.random(-10000, 10000), -1000, math.random(-10000, 10000))))
+					local pos = Players[target].Character.HumanoidRootPart.CFrame
+					local NODE = getCon(clonePart(getPart("Node"), pos))
+					wire(XNOR[0][1], NODE[1][1])
+					wire(NODE[0][1], XNOR[1][1])
+				end
+
+			end,
+		},
+		["spawncar"] = {
+			["ListName"] = "spawncar / car",
+			["Description"] = "Spawns in a car",
+			["Aliases"] = {"car"},
+			["Function"] = function(args, speaker)
+				refreshSeeds()
+				local pos = plr.Character.HumanoidRootPart.CFrame
+				local base = clonePart(getPart("Big part"), pos * CFrame.new(0, -1, -10))
+				clonePart(getPart("Big part"), pos * CFrame.new(0, 3, -10))
+				clonePart(getPart("VehicleSeat"), pos * CFrame.new(2, 5.5, -10) * CFrame.Angles(0, math.rad(90), 0))
+				clonePart(getPart("Cylinder"), pos * CFrame.new(4, 1, -6) * CFrame.Angles(0, math.rad(-90), 0))
+				clonePart(getPart("Cylinder"), pos * CFrame.new(-4, 1, -6) * CFrame.Angles(0, math.rad(-90), 0))
+				clonePart(getPart("Cylinder"), pos * CFrame.new(4, 1, -14) * CFrame.Angles(0, math.rad(90), 0))
+				clonePart(getPart("Cylinder"), pos * CFrame.new(-4, 1, -14) * CFrame.Angles(0, math.rad(90), 0))
+				Delete(base)
+			end,
+		},
+		["ubring"] = {
+			["ListName"] = "ubring [plr]",
+			["Description"] = "Brings a player",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					local myroot = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChildWhichIsA("BasePart")
+					local part = nil
+					for _, brick in pairs(workspace.Map["Vip Bricks"]:GetDescendants()) do
+						if brick:IsA("BasePart") and brick.Anchored and not brick.Locked then
+							part = clonePart(brick, CFrame.new(0, 0, 0))
+							break
+						end
+					end
+					refreshSeeds()
+					task.wait(0.2)
+					local welds = {}
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local root = target.Character:FindFirstChild("HumanoidRootPart") or target.Character:FindFirstChildWhichIsA("BasePart")
+						if root then
+							table.insert(welds, {
+								ClassName = "Weld",
+								Part0 = part,
+								Part1 = root,
+								C0 = myroot.CFrame * CFrame.new(0, 0, -5),
+								C1 = CFrame.new()
+							})
+						end
+					end
+					Resize(part, Vector3.zero, CFrame.new(0, 0, 0), welds)
+					task.wait(0.2)
+					Delete(part)
+				end
+			end,
+		},
+		["ukill"] = {
+			["ListName"] = "ukill [plr]",
+			["Description"] = "Kills a player",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					local myroot = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChildWhichIsA("BasePart")
+					local part = nil
+					for _, brick in pairs(workspace.Map["Vip Bricks"]:GetDescendants()) do
+						if brick:IsA("BasePart") and brick.Anchored and not brick.Locked then
+							part = clonePart(brick, CFrame.new(0, 0, 0))
+							break
+						end
+					end
+					refreshSeeds()
+					task.wait(0.2)
+					local welds = {}
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local root = target.Character:FindFirstChild("HumanoidRootPart") or target.Character:FindFirstChildWhichIsA("BasePart")
+						if root then
+							table.insert(welds, {
+								ClassName = "Weld",
+								Part0 = part,
+								Part1 = root,
+								C0 = CFrame.new(0, -1000000, 0),
+								C1 = CFrame.new()
+							})
+						end
+					end
+					Resize(part, Vector3.zero, CFrame.new(0, 0, 0), welds)
+					task.wait(0.2)
+					Delete(part)
+				end
+			end,
+		},
+		["gohome"] = {
+			["ListName"] = "gohome [plr]",
+			["Description"] = "Teleports to someones home position",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local target = getPlayer(args[1], speaker)[1]
+				local root = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChildWhichIsA("BasePart")
+				if target and root then
+					local home = Players[target].HomePos.Value
+					if home == Vector3.zero then
+						notify("Error", "Player has no home position")
+					else
+						root.CFrame = CFrame.new(home)
+					end
+				end
+			end,
+		},
+		["sethome"] = {
+			["ListName"] = "sethome",
+			["Description"] = "Set your home position",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				GuiCommand:FireServer("sethome")
+				notify("Home set", "Home location set")
+			end,
+		},
+		["urespawn"] = {
+			["ListName"] = "urespawn / ure",
+			["Description"] = "Respawns you",
+			["Aliases"] = {"ure"},
+			["Function"] = function(args, speaker)
+				print(pcall(function()
+					Respawn()
+				end))
+			end,
+		},
+		["auto"] = {
+			["ListName"] = "auto / autore / autorespawn [on/off]",
+			["Description"] = "Respawns you when you die",
+			["Aliases"] = {"autore", "autorespawn"},
+			["Function"] = function(args, speaker)
+				local arg = args[1]:lower()
+				if arg == "on" then
+					autore = true
+					notify("Enabled", "Autorespawn was turned on")
+				elseif arg == "off" then
+					autore = false
+					notify("Disabled", "Autorespawn was turned off")
+				else
+					notify("Invalid", "Invalid argument. Do 'on/off'")
+				end
+			end,
+		},
+		["noatmosphere"] = {
+			["ListName"] = "noatmosphere",
+			["Description"] = "Removes the atmosphere",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local atmosphere = game:GetService("Lighting"):FindFirstChild("Atmosphere")
+				if atmosphere then
+					atmosphere:Destroy()
+				end
+			end,
+		},
+		["mousecursor"] = {
+			["ListName"] = "mousecursor / mouse / cursor [on/off]",
+			["Description"] = "Toggles other people from seeing your mouse",
+			["Aliases"] = {"mouse", "cursor"},
+			["Function"] = function(args, speaker)
+				local arg = args[1]:lower()
+				if arg == "on" then
+					MouseCursorEnabled = true
+					notify("Enabled", "Mousecursor was enabled")
+				elseif arg == "off" then
+					MouseCursorEnabled = false
+					MouseCursor:FireServer(Vector3.new(math.huge, math.huge, math.huge))
+					notify("Disabled", "Mousecursor was disabled")
+				else
+					notify("Invalid", "Invalid argument. Do 'on/off'")
+				end
+			end,
+		},
+		["crashcode"] = {
+			["ListName"] = "crashcode (BAN WARNING)",
+			["Description"] = "This will tell you the crash code",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				crashcode = math.random(1, 999999)
+				notify("Crash code", crashcode)
+			end,
+		},
+		["crash"] = {
+			["ListName"] = "crash [crashcode] (BAN WARNING)",
+			["Description"] = "Crashes the server (WARNING: YOU WILL BE BANNED IF IT IS NOT YOUR SERVER)",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local entered = table.concat(args, " ")
+				if not crashcode then
+					notify("Error", "Run the command 'crashcode' first!")
+				else
+					if entered == tostring(crashcode) then
+						notify("Crashing", "Please wait.")
+					else
+						notify("Error", "Incorrect code.")
+					end
+				end
+			end,
+		},
+		["multiwire"] = {
+			["ListName"] = "multiwire [single/stream/singleto]",
+			["Description"] = "Wires the first parts output to the rests inputs",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				task.wait()
+				local ID = randomString()
+				local Parts = Lasso.Select(function(Part)
+					return not Part.Locked and Part.Parent == workspace and Part.Name ~= "Island"
+				end)
+				local Type = args[1] and args[1]:lower()
+				runningJobs[ID] = {"Wiring", 0}
+				if Type == "singleto" then
+					local Main = Parts[1]
+					if Main then
+						for i, Part in pairs(Parts) do
+							if Part ~= Main then
+								if Main and Part and Main.Parent and Part.Parent then
+									wire(getCon(Part)[0][1], getCon(Main)[1][1])
+								end
+								runningJobs[ID][2] = i / #Parts
+							end
+						end
+					end
+				elseif Type == "stream" then
+					local last = nil
+					for i, Part in pairs(Parts) do
+						if last then
+							if last and Part and last.Parent and Part.Parent then
+								wire(getCon(last)[0][1], getCon(Part)[1][1])
+							end
+						end
+						last = Part
+						runningJobs[ID][2] = i / #Parts
+					end
+				else
+					local Main = Parts[1]
+					if Main then
+						for i, Part in pairs(Parts) do
+							if Part ~= Main then
+								if Main and Part and Main.Parent and Part.Parent then
+									wire(getCon(Main)[0][1], getCon(Part)[1][1])
+								end
+								runningJobs[ID][2] = i / #Parts
+							end
+						end
+					end
+				end
+			end,
+		},
+		["partcount"] = {
+			["ListName"] = "partcount",
+			["Description"] = "Tells you the number of selected parts",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				task.wait()
+				local Parts = Lasso.Select(function(Part)
+					return not Part.Locked and Part.Parent == workspace and Part.Name ~= "Island"
+				end)
+				notify("Part count", #Parts.." parts selected.")
+			end,
+		},
+		["getrunningjobs"] = {
+			["ListName"] = "getrunningjobs",
+			["Description"] = "Tells you the current jobs running",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local t = {}
+				for ID, Data in pairs(runningJobs) do
+					if Data[2] >= 1 then
+						runningJobs[ID] = nil
+					else
+						table.insert(t, Data[1].." job at "..toPercent(Data[2]))
+					end
+				end
+				local s = table.concat(t, "\n")
+				notify("Running jobs", s ~= "" and s or "No running jobs.")
+			end,
+		},
+		["removeboombox"] = {
+			["ListName"] = "removeboombox / noboombox",
+			["Description"] = "Removes a players boombox",
+			["Aliases"] = {"noboombox"},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					local Found = {}
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local boombox = target.Character:FindFirstChild("SuperFlyGoldBoombox")
+						if boombox then
+							table.insert(Found, boombox)
+						end
+					end
+					F3X.Delete(Found)
+				end
+			end,
+		},
+		["unotools"] = {
+			["ListName"] = "unotools",
+			["Description"] = "Removes a players tools",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local NAME = target.Name
+						RebindRender("NOTOOLS_"..NAME, function()
+							if not target then
+								UnbindRender("NOTOOLS_"..NAME)
+							end
+							local Character = target.Character
+							if Character then
+								local Tool = Character:FindFirstChildOfClass("Tool")
+								if Tool then
+									F3X.Delete(Tool)
+								end
+							end
+						end)
+					end
+				end
+			end,
+		}, 
+		["ununotools"] = {
+			["ListName"] = "ununotools",
+			["Description"] = "Stops removing a players tools",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local NAME = target.Name
+						UnbindRender("NOTOOLS_"..NAME)
+					end
+				end
+			end,
+		},
+		["multiedit"] = {
+			["ListName"] = "multiedit [property] [value]",
+			["Description"] = "Sets the properties for multiple parts",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				task.wait()
+				local Property = tableSearch(Wrench.Values, args[1]) or args[1]
+				local Value = table.concat(args, " ", 2)
+
+				if not Property or not Value then
+					return
+				end
+
+				Value = stringToValue(Value)
+
+				local ID = randomString()
+
+				local Filter = function(Part)
+					return not Part.Locked and Part.Parent == workspace and Part.Name ~= "Island"
+				end
+				if Property == "Locked" and not Value then
+					Filter = function(Part)
+						return Part.Parent == workspace and Part.Name ~= "Island"
+					end
+				end
+				local Parts = Lasso.Select(Filter)
+
+				runningJobs[ID] = {"Property", 0}
+				
+				for i, Part in pairs(Parts) do
+					if Part and Part.Parent then
+						Wrench.Edit(Part, Property, Value)
+					end
+					runningJobs[ID][2] = i / #Parts
+				end
+			end,
+		},
+		["removetool"] = {
+			["ListName"] = "removetool",
+			["Description"] = "Removes a players tool",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				local Tools = {}
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local Character = target.Character
+						if Character then
+							local Tool = Character:FindFirstChildOfClass("Tool")
+							if Tool then
+								table.insert(Tools, Tool)
+							end
+						end
+					end
+				end
+				F3X.Delete(Tools)
+			end,
+		},
+		["punish"] = {
+			["ListName"] = "punish [plr]",
+			["Description"] = "Deletes a player from existance",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local NAME = target.Name
+						RebindRender("PUNISH_"..NAME, function()
+							if not target then
+								UnbindRender("PUNISH_"..NAME)
+							end
+							local Character = target.Character
+							if Character and Character.Parent then
+								F3X.Delete(Character)
+							end
+						end)
+					end
+				end
+			end,
+		},
+		["unpunish"] = {
+			["ListName"] = "unpunish [plr]",
+			["Description"] = "Turns off punish",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local NAME = target.Name
+						UnbindRender("PUNISH_"..NAME)
+					end
+				end
+			end,
+		},
+		["ufreeze"] = {
+			["ListName"] = "ufreeze [plr]",
+			["Description"] = "Freezes a player",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local Character = target.Character
+						if Character then
+							local Parts = {}
+							for _, Part in pairs(Character:GetDescendants()) do
+								if Part:IsA("BasePart") then
+									table.insert(Parts, {
+										["Part"] = Part,
+										["Anchored"] = true
+									})
+								end
+							end
+							F3X.Anchor(Parts)
+						end
+					end
+				end
+			end,
+		},
+		["uunfreeze"] = {
+			["ListName"] = "uunfreeze / uthaw [plr]",
+			["Description"] = "Unfreezes a player",
+			["Aliases"] = {"uthaw"},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local Character = target.Character
+						if Character then
+							local Parts = {}
+							for _, Part in pairs(Character:GetDescendants()) do
+								if Part:IsA("BasePart") then
+									table.insert(Parts, {
+										["Part"] = Part,
+										["Anchored"] = false
+									})
+								end
+							end
+							F3X.Anchor(Parts)
+						end
+					end
+				end
+			end,
+		},
+		["cripple"] = {
+			["ListName"] = "cripple [plr]",
+			["Description"] = "Deletes a player except for torso and head",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local Character = target.Character
+						if Character then
+							local Parts = {}
+							for _, Part in pairs(Character:GetDescendants()) do
+								if Part:IsA("BasePart") and not table.find({"Torso", "UpperTorso", "Head"}, Part.Name) then
+									table.insert(Parts, Part)
+								end
+							end
+							F3X.Delete(Parts)
+						end
+					end
+				end
+			end,
+		},
+		["antigrief"] = {
+			["ListName"] = "antigrief [on/off]",
+			["Description"] = "Enables or disable antigrief",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local arg = args[1]:lower()
+				if arg == "on" then
+					GuiFunctions:FireServer("AntiGrief", true)
+					notify("Enabled", "Anti-grief turned on")
+				elseif arg == "off" then
+					GuiFunctions:FireServer("AntiGrief", true)
+					notify("Disabled", "Anti-grief was turned off")
+				else
+					notify("Invalid", "Invalid argument. Do 'on/off'")
+				end
+			end,
+		},
+		["cmdinfo"] = {
+			["ListName"] = "cmdinfo [cmd]",
+			["Description"] = "Chats the command information",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local cmd = args[1]:lower()
+				local data = UBC["Commands"][cmd]
+				if not data then
+					return
+				end
+				local format = "Command: %s | Description: %s"
+				task.wait()
+				chatMessage(format:format(data["ListName"], data["Description"]))
+			end,
+		},
+		["powerdelete"] = {
+			["ListName"] = "powerdelete",
+			["Description"] = "Forcefully deletes parts",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				task.wait()
+				local Parts = Lasso.Select(function(Part)
+					return not Part:IsDescendantOf(workspace.Map) and Part.Name ~= "Island"
+				end)
+				F3X.Delete(Parts)
+			end,
+		},
+		["soundblock"] = {
+			["ListName"] = "soundblock",
+			["Description"] = "Boombox soundblock",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local c = F3X.Clone(workspace.Character.SuperFlyGoldBoombox.Handle)[1]
+				F3X.CanCollide({
+					["Part"] = c,
+					["CanCollide"] = true
+				})
+				F3X.Anchored({
+					["Part"] = c,
+					["Anchored"] = true
+				})
+			end,
+		},
+		["lock"] = {
+			["ListName"] = "lock [plr]",
+			["Description"] = "Locks a player",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local Character = target.Character
+						if Character then
+							local Parts = {}
+							for _, Part in pairs(Character:GetDescendants()) do
+								if Part:IsA("BasePart") then
+									table.insert(Parts, Part)
+								end
+							end
+							F3X.Lock(Parts, true)
+						end
+					end
+				end
+			end,
+		},
+		["unlock"] = {
+			["ListName"] = "unlock [plr]",
+			["Description"] = "Locks a player",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local targets = getPlayer(args[1], speaker)
+				if #targets > 0 then
+					for _, target in pairs(targets) do
+						target = Players[target]
+						local Character = target.Character
+						if Character then
+							local Parts = {}
+							for _, Part in pairs(Character:GetDescendants()) do
+								if Part:IsA("BasePart") then
+									table.insert(Parts, Part)
+								end
+							end
+							F3X.Lock(Parts, false)
+						end
+					end
+				end
+			end,
+		},
+		["cleanup"] = {
+			["ListName"] = "cleanup [partname]",
+			["Description"] = "Removes all parts with this name",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				local Parts = {}
+				local Name = table.concat(args, " ")
+				for _, Part in pairs(workspace:GetChildren()) do
+					if Part.Name == Name then
+						table.insert(Parts, Part)
+					end
+				end
+				local Count = #Parts
+				F3X.Delete(Parts)
+				notify("Cleaned", Count.." parts removed")
+			end,
+		},
+		["ban"] = {
+			["ListName"] = "ban [plr] [time (s/h/d/w/m/y/c/perm)] [reason]",
+			["Description"] = "Game bans a player",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				warn(pcall(function()
+				Admin.Ban(speaker, args[1], args[2], table.concat(args, " ", 3))
+				end))
+			end,
+		},
+
+		["test"] = {
+			["ListName"] = "test",
+			["Description"] = "test",
+			["Aliases"] = {},
+			["Function"] = function(args, speaker)
+				F3X.SetName({game.Players.thedanielkid54321.Character}, "test")
+			end,
+		},
+	},
+}
+
+return UBC
